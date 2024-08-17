@@ -6,7 +6,16 @@
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
-    <Target Name="tailwind" BeforeTargets="BeforeBuild">
+    <ItemGroup>
+        <UpToDateCheckBuilt Include="wwwroot/css/input.css" Set="Css" />
+        <UpToDateCheckBuilt Include="tailwind.config.js" Set="Css" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Common\Common.csproj" />
+    </ItemGroup>
+
+    <Target Name="tailwind" BeforeTargets="Build">
       <Exec Command="npm run tw:dev" />
     </Target>
 </Project>
