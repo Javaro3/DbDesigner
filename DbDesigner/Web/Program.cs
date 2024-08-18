@@ -1,9 +1,6 @@
-using Common.Web;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
-builder.Services.Configure<ImageSettings>(builder.Configuration.GetSection("ImageSettings"));
 
 var app = builder.Build();
 
