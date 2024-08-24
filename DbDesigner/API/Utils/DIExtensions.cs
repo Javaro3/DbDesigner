@@ -2,17 +2,16 @@
 using Common.Domain;
 using Common.Options;
 using Common.Profiles;
-using Infrastructure;
 using Infrastructure.Auth;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Repository;
 using Repository.Repositories;
 using Repository.Repositories.Interfaces;
-using Service;
 using Service.DataServicies;
-using Service.Interfaces;
 using Service.Interfaces.Infrastructure.Auth;
 
 namespace API.Utils;
@@ -28,7 +27,7 @@ public static class DIExtensions
     
     public static void AddServicies(this IServiceCollection services)
     {
-        services.AddScoped<UserService>();
+        services.AddScoped<AuthService>();
     }
     
     public static void AddInfrastructure(this IServiceCollection services)
@@ -47,13 +46,20 @@ public static class DIExtensions
         services.AddAutoMapper(typeof(UserProfile));
     }
     
-    public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+    public static void AddGoogleAndJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtOption = configuration.GetSection("JwtOptions").Get<JwtOptions>();
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        var googleKeysOptions = configuration.GetSection("GoogleKeysOptions").Get<GoogleKeysOptions>();
+        
+        services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
             {
-                options.TokenValidationParameters = new()
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = false,
                     ValidateAudience = false,
@@ -70,8 +76,15 @@ public static class DIExtensions
                         return Task.CompletedTask;
                     }
                 };
+            })
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+            {
+                options.ClientId = googleKeysOptions.ClientId;
+                options.ClientSecret = googleKeysOptions.ClientSecret;
+                options.CallbackPath = googleKeysOptions.CallbackPath;
             });
-
+        
         services.AddAuthorization();
     }
 }
