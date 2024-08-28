@@ -25,7 +25,10 @@ public class UserRespository : IRepository<User>
 
     public async Task<IEnumerable<User>> GetAsync()
     {
-        return await _context.Users.ToListAsync();
+        return await _context.Users
+            .Include(e => e.Roles)
+            .ThenInclude(e => e.Permissions)
+            .ToListAsync();
     }
 
     public async Task<bool> DeleteAsync(int id)

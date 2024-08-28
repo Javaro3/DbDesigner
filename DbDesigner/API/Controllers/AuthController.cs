@@ -1,8 +1,8 @@
 ﻿using System.Security.Claims;
 using Common.Dtos.UserDtos;
-using Common.Enums;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
 using Service.DataServicies;
 
@@ -24,7 +24,7 @@ public class AuthController : Controller
     {
         try
         {
-            var jwt = await _authService.Login(dto);
+            var jwt = await _authService.LoginAsync(dto);
             HttpContext.Response.Cookies.Append("jwt", jwt);
             return Results.Ok();
         }
@@ -39,7 +39,7 @@ public class AuthController : Controller
     {
         try
         {
-            await _authService.Register(dto);
+            await _authService.RegisterAsync(dto);
             return Results.Ok();
         }
         catch (Exception e)
@@ -52,7 +52,7 @@ public class AuthController : Controller
     public IResult GoogleLogin()
     {
         var properties = new AuthenticationProperties { RedirectUri = Url.Action("GoogleResponse") };
-        return Results.Challenge(properties, [AuthScheme.Google.ToString()]);
+        return Results.Challenge(properties, [GoogleDefaults.AuthenticationScheme]);
     }
 
     [HttpGet("/google-response")]
@@ -67,7 +67,7 @@ public class AuthController : Controller
         
         try
         {
-            var jwt = await _authService.GoogleLogin(name, email);
+            var jwt = await _authService.GoogleLoginAsync(name, email);
             HttpContext.Response.Cookies.Append("jwt", jwt);
             return Results.Ok();
         }

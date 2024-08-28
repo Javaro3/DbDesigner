@@ -1,11 +1,13 @@
 ﻿using System.Text;
 using Common.Domain;
+using Common.Enums;
 using Common.Options;
 using Common.Profiles;
 using Infrastructure.Auth;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Repository;
@@ -23,6 +25,7 @@ public static class DIExtensions
         var connectionString = configuration.GetConnectionString("Postgres")!;
         services.AddDbContext<DbDesignerContext>(e => e.UseNpgsql(connectionString));
         services.AddScoped<IRepository<User>, UserRespository>();
+        services.AddScoped<IRepository<Role>, RoleRepository>();
     }
     
     public static void AddServicies(this IServiceCollection services)
@@ -34,11 +37,14 @@ public static class DIExtensions
     {
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtProvider, JwtProvider>();
+        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
     }
     
     public static void AddOptions(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
+        services.Configure<GoogleKeysOptions>(configuration.GetSection(nameof(JwtOptions)));
+        services.Configure<AuthOptions>(configuration.GetSection(nameof(AuthOptions)));
     }
     
     public static void AddMappers(this IServiceCollection services)
@@ -85,6 +91,22 @@ public static class DIExtensions
                 options.CallbackPath = googleKeysOptions.CallbackPath;
             });
         
-        services.AddAuthorization();
+        services.AddAuthorization(e =>
+        {
+            e.AddCustomPolicy(PolicyName.TestGet, PermissionEnum.Create);
+        });
+    }
+
+    private static void AddCustomPolicy(
+        this AuthorizationOptions authorizationOptions, 
+        string policyName,
+        params PermissionEnum[] permissions)
+    {
+        
+        authorizationOptions.AddPolicy(policyName, c =>
+        {
+            c.AuthenticationSchemes = [JwtBearerDefaults.AuthenticationScheme];
+            c.AddRequirements(new PermissionRequirement(permissions));
+        });
     }
 }
