@@ -1,5 +1,4 @@
-﻿using Service.Interfaces;
-using Service.Interfaces.Infrastructure.Auth;
+﻿using Service.Interfaces.Infrastructure.Auth;
 
 namespace Infrastructure.Auth;
 
