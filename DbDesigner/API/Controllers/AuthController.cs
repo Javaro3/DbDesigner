@@ -1,8 +1,11 @@
 ﻿using System.Security.Claims;
+using Common.Constants;
 using Common.Dtos.UserDtos;
+using Common.Exceptions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.DataServicies;
 
@@ -28,9 +31,9 @@ public class AuthController : Controller
             HttpContext.Response.Cookies.Append("jwt", jwt);
             return Results.Ok();
         }
-        catch (Exception e)
+        catch (ValidationException e)
         {
-            return Results.BadRequest(e.Message);
+            return Results.BadRequest(e.ValidationResult);
         }
     }
 
@@ -42,9 +45,9 @@ public class AuthController : Controller
             await _authService.RegisterAsync(dto);
             return Results.Ok();
         }
-        catch (Exception e)
+        catch (ValidationException e)
         {
-            return Results.BadRequest(e.Message);
+            return Results.BadRequest(e.ValidationResult);
         }
     }
 
@@ -71,13 +74,14 @@ public class AuthController : Controller
             HttpContext.Response.Cookies.Append("jwt", jwt);
             return Results.Ok();
         }
-        catch (Exception e)
+        catch (ValidationException e)
         {
-            return Results.BadRequest(e.Message);
+            return Results.BadRequest(e.ValidationResult);
         }
     }
     
     [HttpPost("/logout")]
+    [Authorize(Policy.Auth.Logout)]
     public async Task<IResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
