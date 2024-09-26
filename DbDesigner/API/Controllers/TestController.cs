@@ -1,4 +1,4 @@
-﻿using Common.Enums;
+﻿using Common.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +9,7 @@ namespace API.Controllers;
 public class TestController : Controller
 {
     [HttpGet("/get")]
-    [Authorize(Policy = PolicyName.TestGet)]
+    [Authorize(Policy = Policy.Test.TestGet)]
     public IResult GetData()
     {
         List<string> data = [

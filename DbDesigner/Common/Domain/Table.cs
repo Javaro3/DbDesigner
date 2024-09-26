@@ -2,7 +2,7 @@
 
 namespace Common.Domain;
 
-public class Role : BaseModel, IHasId, IHasName, IHasDescription
+public class Table : BaseModel, IHasId, IHasName, IHasDescription
 {
     public int Id { get; set; }
     
@@ -10,7 +10,7 @@ public class Role : BaseModel, IHasId, IHasName, IHasDescription
     
     public string? Description { get; set; }
 
-    public ICollection<Permission> Permissions { get; set; } = [];
-    
-    public ICollection<User> Users { get; set; } = [];
+    public ICollection<Project> Projects { get; set; } = [];
+
+    public ICollection<Column> Columns { get; set; } = [];
 }

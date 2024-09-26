@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Common.Constants;
 using Common.Domain;
 using Common.Enums;
 using Common.Options;
@@ -26,6 +27,7 @@ public static class DIExtensions
         services.AddDbContext<DbDesignerContext>(e => e.UseNpgsql(connectionString));
         services.AddScoped<IRepository<User>, UserRespository>();
         services.AddScoped<IRepository<Role>, RoleRepository>();
+        services.AddScoped<IRepository<Permission>, PermissionRespository>();
     }
     
     public static void AddServicies(this IServiceCollection services)
@@ -93,7 +95,8 @@ public static class DIExtensions
         
         services.AddAuthorization(e =>
         {
-            e.AddCustomPolicy(PolicyName.TestGet, PermissionEnum.Create);
+            e.AddCustomPolicy(Policy.Test.TestGet, PermissionEnum.Read);
+            e.AddCustomPolicy(Policy.Auth.Logout, PermissionEnum.Read);
         });
     }
 

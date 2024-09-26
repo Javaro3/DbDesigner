@@ -2,6 +2,7 @@
 using Common.Domain;
 using Common.Dtos.UserDtos;
 using Common.Enums;
+using Common.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Repository.Repositories.Interfaces;
 using Service.Interfaces.Infrastructure.Auth;
@@ -36,10 +37,11 @@ public class AuthService
         var user = _mapper.Map<User>(dto);
         var isNew = await IsNewAsync(user.Email);
         
-        if (!isNew) throw new Exception("This user is already exist");
+        if (!isNew) throw new ValidationException(nameof(UserRegisterDto.Email), "This user is already exist");
         
         var passwordHash = _hasher.Generate(dto.Password);
         user.PasswordHash = passwordHash;
+        user.CreatedOn = DateTime.UtcNow;
         
         var role = await _roleRepository.GetAsync((int)RoleEnum.User);
         user.Roles = new List<Role> {role};
@@ -64,10 +66,10 @@ public class AuthService
     public async Task<string> LoginAsync(UserLoginDto dto)
     {
         var user = await _userRepository.Query().FirstOrDefaultAsync(e => e.Email == dto.Email);
-        if (user == null) throw new Exception("This user does not exist");
+        if (user == null) throw new ValidationException(nameof(UserLoginDto.Email), "This user does not exist");
 
         var passwordIsCorrect = _hasher.Verify(dto.Password, user.PasswordHash);
-        if (!passwordIsCorrect) throw new Exception("Password is not correct");
+        if (!passwordIsCorrect) throw new ValidationException(nameof(UserLoginDto.Password), "Password is not correct");
 
         var token = _jwtProvider.GenerateToken(user);
         return token;

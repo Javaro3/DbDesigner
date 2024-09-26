@@ -2,9 +2,9 @@
 
 namespace Common.Domain;
 
-public class UserRole : BaseModel
+public class UserProject : BaseModel
 {
     public int UserId { get; set; }
     
-    public int RoleId { get; set; }
+    public int ProjectId { get; set; }
 }
