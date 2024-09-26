@@ -1,4 +1,5 @@
 ﻿using Common.Domain;
+using Common.Domain.BaseDomain;
 
 namespace Repository.Repositories.Interfaces;
 

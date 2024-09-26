@@ -1,4 +1,6 @@
-﻿namespace Common.Domain;
+﻿using Common.Domain.BaseDomain;
+
+namespace Common.Domain;
 
 public class RolePermission : BaseModel
 {

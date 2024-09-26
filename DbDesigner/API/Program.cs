@@ -1,6 +1,5 @@
 using API.Utils;
 using Common.Dtos;
-using Common.Exceptions;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,8 +25,17 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
         return new BadRequestObjectResult(validationResult);
     };
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        policy => policy.WithOrigins("http://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
+
 
 var app = builder.Build();
+app.UseCors("AllowSpecificOrigin");
 app.UseRouting();
 
 if (app.Environment.IsDevelopment())

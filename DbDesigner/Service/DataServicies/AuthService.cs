@@ -41,6 +41,7 @@ public class AuthService
         
         var passwordHash = _hasher.Generate(dto.Password);
         user.PasswordHash = passwordHash;
+        user.CreatedOn = DateTime.UtcNow;
         
         var role = await _roleRepository.GetAsync((int)RoleEnum.User);
         user.Roles = new List<Role> {role};

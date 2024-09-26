@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Common.Validations;
+using Common.Attributes;
 
 namespace Common.Dtos.UserDtos;
 

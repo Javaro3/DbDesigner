@@ -2,7 +2,7 @@
 
 namespace Common.Domain;
 
-public class Role : BaseModel, IHasId, IHasName, IHasDescription
+public class IndexType : BaseModel, IHasId, IHasName, IHasDescription
 {
     public int Id { get; set; }
     
@@ -10,7 +10,5 @@ public class Role : BaseModel, IHasId, IHasName, IHasDescription
     
     public string? Description { get; set; }
 
-    public ICollection<Permission> Permissions { get; set; } = [];
-    
-    public ICollection<User> Users { get; set; } = [];
+    public ICollection<DataBase> DataBases { get; set; } = [];
 }
