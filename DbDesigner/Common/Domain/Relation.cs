@@ -2,7 +2,7 @@
 
 namespace Common.Domain;
 
-public class Relation : BaseModel,IHasId
+public class Relation : BaseModel, IHasId
 {
     public int Id { get; set; }
     
@@ -16,5 +16,9 @@ public class Relation : BaseModel,IHasId
 
     public int OnDeleteId { get; set; }
     
+    public RelationAction? OnDelete { get; set; }
+    
     public int OnUpdateId { get; set; }
+    
+    public RelationAction? OnUpdate { get; set; }
 }

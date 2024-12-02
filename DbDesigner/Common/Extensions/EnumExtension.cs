@@ -12,6 +12,12 @@ public static class EnumExtension
         return attributes.Length > 0 ? attributes[0].Description : value.ToString();
     }
     
+    public static string GetImage(this Enum value)
+    {
+        var attributes = GetAttribute<ImageAttribute>(value);
+        return attributes.Length > 0 ? attributes[0].Image : value.ToString();
+    }
+    
     public static string GetDescription(this Enum value) 
     {
         var attributes = GetAttribute<DescriptionAttribute>(value);
@@ -30,10 +36,16 @@ public static class EnumExtension
         return attributes.Length > 0 ? attributes[0].DataBases : [];
     }
     
+    public static IEnumerable<SqlTypeEnum> GetSqlTypes(this Enum value) 
+    {
+        var attributes = GetAttribute<SqlTypeAttribute>(value);
+        return attributes.Length > 0 ? attributes[0].SqlTypes : [];
+    }
+    
     public static bool GetParams(this Enum value) 
     {
-        var attributes = GetAttribute<ParamAttribute>(value);
-        return attributes.Length > 0 && attributes[0].HasParam;
+        var attributes = GetAttribute<HasParamsAttribute>(value);
+        return attributes.Length > 0 && attributes[0].HasParams;
     }
 
     private static T[] GetAttribute<T>(Enum value) where T : Attribute

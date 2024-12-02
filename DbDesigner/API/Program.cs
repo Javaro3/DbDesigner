@@ -1,41 +1,61 @@
 using API.Utils;
-using Common.Dtos;
-using Microsoft.AspNetCore.CookiePolicy;
-using Microsoft.AspNetCore.Mvc;
+using Common.Options;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRepositories(builder.Configuration);
-builder.Services.AddServicies();
+builder.Services.AddServices();
 builder.Services.AddInfrastructure();
+builder.Services.AddControllers();
 builder.Services.AddOptions(builder.Configuration);
 builder.Services.AddMappers();
 builder.Services.AddGoogleAndJwtAuthentication(builder.Configuration);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
+builder.Services.AddSwaggerGen(options =>
 {
-    options.InvalidModelStateResponseFactory = context =>
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        var validationResult = context.ModelState
-            .Where(e => e.Value?.Errors.Count > 0)
-            .Select(e => new ValidationDto {FieldName = e.Key, Message = e.Value?.Errors.First().ErrorMessage })
-            .ToList();
-        return new BadRequestObjectResult(validationResult);
-    };
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Input 'Bearer' [space] and your JWT token."
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            []
+        }
+    });
 });
+
+var frontendOptions = builder.Configuration.GetSection("FrontendOptions").Get<FrontendOptions>();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigin",
-        policy => policy.WithOrigins("http://localhost:3000")
+    options.AddPolicy("AllowAll",
+        policy => policy.WithOrigins(frontendOptions!.Url)
             .AllowAnyHeader()
-            .AllowAnyMethod());
+            .AllowAnyMethod()
+            .AllowCredentials());
 });
 
 
 var app = builder.Build();
-app.UseCors("AllowSpecificOrigin");
+app.UseCors("AllowAll");
 app.UseRouting();
 
 if (app.Environment.IsDevelopment())
@@ -47,13 +67,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseCookiePolicy(new CookiePolicyOptions
-{
-    MinimumSameSitePolicy = SameSiteMode.Lax,
-    HttpOnly = HttpOnlyPolicy.Always,
-    Secure = CookieSecurePolicy.Always
-});
 
 app.MapControllers();
 

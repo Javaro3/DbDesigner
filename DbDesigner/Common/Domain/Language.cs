@@ -2,7 +2,7 @@
 
 namespace Common.Domain;
 
-public class Language : BaseModel, IHasId, IHasName, IHasDescription
+public class Language : BaseModel, IHasId, IHasName, IHasDescription, IHasImage
 {
     public int Id { get; set; }
     
@@ -10,7 +10,7 @@ public class Language : BaseModel, IHasId, IHasName, IHasDescription
     
     public string? Description { get; set; }
 
-    public string Logo { get; set; } = string.Empty;
+    public string Image { get; set; } = string.Empty;
 
     public ICollection<Orm> Orms { get; set; } = [];
 }

@@ -10,7 +10,5 @@ public class Role : BaseModel, IHasId, IHasName, IHasDescription
     
     public string? Description { get; set; }
 
-    public ICollection<Permission> Permissions { get; set; } = [];
-    
     public ICollection<User> Users { get; set; } = [];
 }

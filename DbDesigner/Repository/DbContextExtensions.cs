@@ -2,7 +2,6 @@
 using Common.Domain.BaseDomain;
 using Common.Enums;
 using Common.Extensions;
-using Common.Options;
 using Microsoft.EntityFrameworkCore;
 using Repository.Configurations.DataConfigurations;
 using Repository.Configurations.RelationConfigurations;
@@ -56,13 +55,6 @@ public static class DbContextExtensions
             e => e.ProjectId
         ));
         
-        modelBuilder.ApplyConfiguration(new BaseManyToManyConfiguration<Role, Permission, RolePermission>(
-            e => e.Permissions,
-            e => e.Roles,
-            e => e.PermissionId,
-            e => e.RoleId
-        ));
-        
         modelBuilder.ApplyConfiguration(new BaseManyToManyConfiguration<Table, Column, TableColumn>(
             e => e.Columns,
             e => e.Tables,
@@ -83,15 +75,17 @@ public static class DbContextExtensions
             e => e.RoleId,
             e => e.UserId
         ));
+        
+        modelBuilder.ApplyConfiguration(new BaseManyToManyConfiguration<LanguageType, SqlType, LanguageTypeSqlType>(
+            e => e.SqlTypes,
+            e => e.LanguageTypes,
+            e => e.SqlTypeId,
+            e => e.LanguageTypeId
+        ));
     }
 
-    public static void ConfigureData(this ModelBuilder modelBuilder, AuthOptions authOptions)
+    public static void ConfigureData(this ModelBuilder modelBuilder)
     {
-        var permissionEnumSelector = CreateBaseEnumFieldsSelector<PermissionEnum>()
-            .AddNameToEnumFieldsSelector()
-            .AddDescriptionToEnumFieldsSelector();
-        modelBuilder.ApplyConfiguration(new BaseEnumConfiguration<Permission, PermissionEnum>(permissionEnumSelector));
-        
         var roleEnumSelector = CreateBaseEnumFieldsSelector<RoleEnum>()
             .AddNameToEnumFieldsSelector()
             .AddDescriptionToEnumFieldsSelector();
@@ -104,6 +98,7 @@ public static class DbContextExtensions
         
         var dataBaseEnumSelector = CreateBaseEnumFieldsSelector<DataBaseEnum>()
             .AddNameToEnumFieldsSelector()
+            .AddImageToEnumFieldsSelector()
             .AddDescriptionToEnumFieldsSelector();
         modelBuilder.ApplyConfiguration(new BaseEnumConfiguration<DataBase, DataBaseEnum>(dataBaseEnumSelector));
         
@@ -114,6 +109,7 @@ public static class DbContextExtensions
         
         var languageEnumSelector = CreateBaseEnumFieldsSelector<LanguageEnum>()
             .AddNameToEnumFieldsSelector()
+            .AddImageToEnumFieldsSelector()
             .AddDescriptionToEnumFieldsSelector();
         modelBuilder.ApplyConfiguration(new BaseEnumConfiguration<Language, LanguageEnum>(languageEnumSelector));
         
@@ -133,9 +129,29 @@ public static class DbContextExtensions
             .AddParamsToEnumFieldsSelector();
         modelBuilder.ApplyConfiguration(new BaseEnumConfiguration<Property, PropertyEnum>(propertyEnumSelector));
 
+        var sqlTypeEnumSelector = CreateBaseEnumFieldsSelector<SqlTypeEnum>()
+            .AddNameToEnumFieldsSelector()
+            .AddDescriptionToEnumFieldsSelector()
+            .AddParamsToEnumFieldsSelector();
+        modelBuilder.ApplyConfiguration(new BaseEnumConfiguration<SqlType, SqlTypeEnum>(sqlTypeEnumSelector));
+
+        var languageTypeEnumSelector = CreateBaseEnumFieldsSelector<LanguageTypeEnum>()
+            .AddNameToEnumFieldsSelector()
+            .AddDescriptionToEnumFieldsSelector()
+            .AddLanguageToEnumFieldsSelector();
+        modelBuilder.ApplyConfiguration(new BaseEnumConfiguration<LanguageType, LanguageTypeEnum>(languageTypeEnumSelector));
+
+        
         modelBuilder.ApplyConfiguration(new LanguageOrmConfiguration());
         modelBuilder.ApplyConfiguration(new DataBaseIndexTypeConfiguration());
-        modelBuilder.ApplyConfiguration(new RolePermissionConfiguration(authOptions));
+        modelBuilder.ApplyConfiguration(new DataBaseTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new LanguageTypeSqlTypeConfiguration());
+
+
+        var userConfiguration = new UserConfiguration();
+        var userRoleConfiguration = new UserRoleConfiguration(userConfiguration.Users);
+        modelBuilder.ApplyConfiguration(userConfiguration);
+        modelBuilder.ApplyConfiguration(userRoleConfiguration);
     }
     
     private static Dictionary<string, Func<T, object>> CreateBaseEnumFieldsSelector<T>() where T: Enum
@@ -149,6 +165,12 @@ public static class DbContextExtensions
         return selector;
     }
     
+    private static Dictionary<string, Func<T, object>> AddImageToEnumFieldsSelector<T>(this Dictionary<string, Func<T, object>> selector) where T: Enum
+    {
+        selector.Add(nameof(IHasImage.Image), e => e.GetImage());
+        return selector;
+    }
+    
     private static Dictionary<string, Func<T, object>> AddDescriptionToEnumFieldsSelector<T>(this Dictionary<string, Func<T, object>> selector) where T: Enum
     {
         selector.Add(nameof(IHasDescription.Description), e => e.GetDescription());
@@ -158,6 +180,12 @@ public static class DbContextExtensions
     private static Dictionary<string, Func<T, object>> AddParamsToEnumFieldsSelector<T>(this Dictionary<string, Func<T, object>> selector) where T: Enum
     {
         selector.Add(nameof(IHasParams.HasParams), e => e.GetParams());
+        return selector;
+    }
+
+    private static Dictionary<string, Func<T, object>> AddLanguageToEnumFieldsSelector<T>(this Dictionary<string, Func<T, object>> selector) where T: Enum
+    {
+        selector.Add(nameof(LanguageType.LanguageId), e => e.GetLanguages().First());
         return selector;
     }
 }

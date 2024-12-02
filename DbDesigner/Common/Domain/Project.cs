@@ -12,6 +12,10 @@ public class Project : BaseModel, IHasId, IHasName, IHasDescription
     
     public DateTime CreatedOn { get; set; }
     
+    public int DataBaseId { get; set; }
+    
+    public DataBase? DataBase { get; set; }
+    
     public ICollection<User> Users { get; set; } = [];
     
     public ICollection<Table> Tables { get; set; } = [];

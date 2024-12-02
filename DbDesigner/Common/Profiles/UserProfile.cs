@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Common.Domain;
-using Common.Dtos.UserDtos;
+using Common.Dtos;
+using Common.Dtos.User;
 
 namespace Common.Profiles;
 
@@ -13,5 +14,12 @@ public class UserProfile : Profile
         
         CreateMap<User, UserLoginDto>();
         CreateMap<UserLoginDto, User>();
+        
+        CreateMap<User, UserAddDto>();
+        CreateMap<UserAddDto, User>();
+
+        CreateMap<User, UserDto>();
+        CreateMap<UserDto, User>();
+        CreateMap<User, ComboboxDto>();
     }
 }
