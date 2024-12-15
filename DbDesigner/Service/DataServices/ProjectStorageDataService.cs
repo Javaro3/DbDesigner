@@ -28,12 +28,52 @@ public class ProjectStorageDataService : IProjectStorageDataService
         var sqlCreatePath = Path.Combine(baseDirectory, "database.sql");
         await File.WriteAllTextAsync(sqlCreatePath, model.CreateScript);
 
-        var domainDirectory = Path.Combine(baseDirectory, "Domains");
+        if (model.DataScript is not null)
+        {
+            var sqlDataPath = Path.Combine(baseDirectory, "data.sql");
+            await File.WriteAllTextAsync(sqlDataPath, model.DataScript);
+        }
+
+        var dalDirectory = Path.Combine(baseDirectory, "DAL");
+        
+        var domainDirectory = Path.Combine(dalDirectory, "Domains");
         Directory.CreateDirectory(domainDirectory);
         foreach (var domain in model.Domains)
         {
             var domainPath = Path.Combine(domainDirectory, $"{domain.DomainName}.cs");
             await File.WriteAllTextAsync(domainPath, domain.DomainContent);
+        }
+
+        var ormPath = Path.Combine(dalDirectory, $"{model.Orm.OrmName}.cs");
+        await File.WriteAllTextAsync(ormPath, model.Orm.OrmContect);
+
+        if (model.Architecture is not null)
+        {
+            var architecturePath = Path.Combine(dalDirectory, model.Architecture.Name);
+            Directory.CreateDirectory(architecturePath);
+            if (model.Architecture.InterfaceFiles.Any())
+            {
+                var architectureInterfacePath = Path.Combine(architecturePath, "Interfaces");
+                Directory.CreateDirectory(architectureInterfacePath);
+
+                foreach (var (name, content) in model.Architecture.InterfaceFiles)
+                {
+                    var interfacePath = Path.Combine(architectureInterfacePath, $"{name}.cs");
+                    await File.WriteAllTextAsync(interfacePath, content);
+                }
+            }
+            
+            if (model.Architecture.ImplementationFiles.Any())
+            {
+                var architectureImplementationPath = Path.Combine(architecturePath, "Implementations");
+                Directory.CreateDirectory(architectureImplementationPath);
+
+                foreach (var (name, content) in model.Architecture.ImplementationFiles)
+                {
+                    var implementPath = Path.Combine(architectureImplementationPath, $"{name}.cs");
+                    await File.WriteAllTextAsync(implementPath, content);
+                }
+            }
         }
         
         var archivePath = Path.Combine(_path, $"{model.ProjectId}.zip");

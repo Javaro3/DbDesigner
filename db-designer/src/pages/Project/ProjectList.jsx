@@ -8,6 +8,7 @@ import TextFilter from '../../components/UI/gridFilters/TextFilter';
 import MultiSelectFilter from '../../components/UI/gridFilters/MultiboxFilter';
 import DateTimeRangeFilter from '../../components/UI/gridFilters/DateTimeRangeFilter';
 import Button from '../../components/UI/buttons/Button';
+import { download } from '../../services/projectService';
 
 export default function ProjectList() {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ export default function ProjectList() {
   }, []);
 
   const onDownloadHandle = useCallback(async (id) => {
-    console.log(`${id} Downloading... `);
+    await download(id, 'result.zip')
   }, []);
 
   const fetchUserOptions = useCallback(async () => {

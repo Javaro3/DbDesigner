@@ -6,12 +6,15 @@ using Common.Dtos.Index;
 using Common.Dtos.Project;
 using Common.Dtos.Property;
 using Common.Dtos.Relation;
+using Common.Dtos.Table;
 using Common.Enums;
 using Common.Extensions;
 using Common.GenerateModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic.CompilerServices;
 using Repository.Repositories.Interfaces;
 using Service.Interfaces.Infrastructure.DataServices;
+using Service.Interfaces.Infrastructure.Infrastructure;
 using Service.Interfaces.Infrastructure.Infrastructure.Builders;
 using Service.Interfaces.Infrastructure.Infrastructure.Factories;
 using Service.Interfaces.Infrastructure.Infrastructure.Helpers;
@@ -30,6 +33,9 @@ public class ProjectDataService : BaseDataService<Project, ProjectCardDto, Proje
     private readonly IRepository<LanguageType> _languageTypeRepository;
     private readonly IFactory<IDataBaseBuilder> _dataBaseBuilderFactory;
     private readonly IFactory<IDomainBuilder> _domainBuilderFactory;
+    private readonly IFactory<IOrmBuilder> _ormBuilderFactory;
+    private readonly IFactory<IArchitectureBuilder?> _architectureBuilderFactory;
+    private readonly ITcpManager _tcpManager;
     
     public ProjectDataService(
         IProjectRepository repository,
@@ -45,7 +51,10 @@ public class ProjectDataService : BaseDataService<Project, ProjectCardDto, Proje
         IRepository<Property> propertyRepository,
         IRepository<IndexColumn> indexColumnRepository,
         IRepository<LanguageType> languageTypeRepository,
-        IFactory<IDomainBuilder> domainBuilderFactory) : base(repository, dataSourceHelper, helper, mapper)
+        IFactory<IDomainBuilder> domainBuilderFactory,
+        IFactory<IOrmBuilder> ormBuilderFactory,
+        IFactory<IArchitectureBuilder> architectureBuilderFactory,
+        ITcpManager tcpManager) : base(repository, dataSourceHelper, helper, mapper)
     {
         _columnPropertyRepository = columnPropertyRepository;
         _indexRepository = indexRepository;
@@ -57,6 +66,9 @@ public class ProjectDataService : BaseDataService<Project, ProjectCardDto, Proje
         _indexColumnRepository = indexColumnRepository;
         _languageTypeRepository = languageTypeRepository;
         _domainBuilderFactory = domainBuilderFactory;
+        _ormBuilderFactory = ormBuilderFactory;
+        _architectureBuilderFactory = architectureBuilderFactory;
+        _tcpManager = tcpManager;
     }
     
     public override async Task UpdateAsync(ProjectCardDto dto)
@@ -102,30 +114,70 @@ public class ProjectDataService : BaseDataService<Project, ProjectCardDto, Proje
     public async Task<ResultGenerateModel> GetDataBaseSqlScript(ProjectGenerateDto dto)
     {
         var dataBaseGenerateModel = await GetDataBaseGenerateModel(dto);
-        var domainGenerateModels = await GetDomainGenerateModels(dataBaseGenerateModel, dto); 
-        
-        var databaseBuilder = _dataBaseBuilderFactory.GetEntity(dto.DataBaseId);
-        var domainBuilder = _domainBuilderFactory.GetEntity(dto.LanguageId);
-        
-        var script = databaseBuilder
+        var domainGenerateTask = GetDomainGenerateModels(dataBaseGenerateModel, dto);
+        var databaseBuilderTask = Task.FromResult(_dataBaseBuilderFactory.GetEntity(dto.DataBaseId));
+        var domainBuilderTask = Task.FromResult(_domainBuilderFactory.GetEntity(dto.LanguageId));
+        var ormBuilderTask = Task.FromResult(_ormBuilderFactory.GetEntity(dto.OrmId));
+        var architectureBuilderTask = Task.FromResult(_architectureBuilderFactory.GetEntity(dto.ArchitectureId));
+
+        await Task.WhenAll(domainGenerateTask, databaseBuilderTask, domainBuilderTask, ormBuilderTask, architectureBuilderTask);
+
+        var domainGenerateModels = domainGenerateTask.Result;
+        var databaseBuilder = databaseBuilderTask.Result;
+        var domainBuilder = domainBuilderTask.Result;
+        var ormBuilder = ormBuilderTask.Result;
+        var architectureBuilder = architectureBuilderTask.Result;
+
+        var scriptTask = Task.Run(() => databaseBuilder
             .AddName(dataBaseGenerateModel.DataBaseName)
             .AddTables(dataBaseGenerateModel.Tables)
             .AddIndexes(dataBaseGenerateModel.Indexes)
-            .Generate();
+            .Generate());
 
-        var domains = domainGenerateModels
-            .Select(e => (e.DomainName.ConvertToPascalCase(), domainBuilder
-                .AddDomainName(e.DomainName)
-                .AddFields(e.Fields)
-                .AddRelations(e.Relations)
-                .Generate()))
-            .ToList();
+        var domainsTask = Task.Run(() =>
+            domainGenerateModels
+                .Select(e => (e.DomainName.ConvertToPascalCase(), domainBuilder
+                    .AddDomainName(e.DomainName)
+                    .AddFields(e.Fields)
+                    .AddRelations(e.Relations)
+                    .Generate()))
+                .ToList());
+
+        var ormGenerateModel = new OrmGenerateModel
+        {
+            OrmName = dataBaseGenerateModel.DataBaseName.ConvertToPascalCase() + "DbContext",
+            Domains = domainGenerateModels.Select(e => e.DomainName.ConvertToPascalCase()).ToList()
+        };
+
+        var ormTask = Task.Run(() => ormBuilder
+            .AddOrm(ormGenerateModel)
+            .Generate());
+
+        var architectureTask = architectureBuilder is not null
+            ? Task.Run(() => architectureBuilder
+                .AddName()
+                .AddInterfaces()
+                .AddImplementation(ormGenerateModel)
+                .Generate())
+            : Task.FromResult<ArchitectureGenerateModel?>(null);
+
+        string? dataScript = null;
+        if (dto.TableGenerateInfos.Any())
+        {
+            var dataModel = GetDataModel(dataBaseGenerateModel, dto.TableGenerateInfos.ToList());
+            dataScript = await _tcpManager.SendGenerationDataAsync(dataModel);
+        }
+
+        await Task.WhenAll(scriptTask, domainsTask, ormTask, architectureTask);
 
         var result = new ResultGenerateModel
         {
             ProjectId = dto.ProjectId,
-            CreateScript = script,
-            Domains = domains
+            CreateScript = scriptTask.Result,
+            DataScript = dataScript,
+            Domains = domainsTask.Result,
+            Orm = (ormGenerateModel.OrmName, ormTask.Result),
+            Architecture = architectureTask.Result
         };
 
         return result;
@@ -138,7 +190,7 @@ public class ProjectDataService : BaseDataService<Project, ProjectCardDto, Proje
 
         return new DataBaseGenerateModel
         {
-            DataBaseName = project.Name,
+            DataBaseName = project.Name.ConvertToPascalCase(),
             Tables = await GetTableGenerateModels(project.Id),
             Indexes = await GetIndexGenerateModels(project.Id)
         };
@@ -282,6 +334,36 @@ public class ProjectDataService : BaseDataService<Project, ProjectCardDto, Proje
                 Params = property.PropertyParams
             });
         }
+
+        return models;
+    }
+    
+    private  DataProjectGenerateModel GetDataModel(DataBaseGenerateModel dataBaseModel, List<TableGenerateDto> tables)
+    {
+        var models = new DataProjectGenerateModel
+        {
+            DatabaseName = dataBaseModel.DataBaseName,
+            Tables = tables.Select(e =>
+            {
+                var table = dataBaseModel.Tables.First(x => x.TableId == e.TableId);
+                return new DataTableGenerateModel
+                {
+                    TableId = e.TableId,
+                    TableName = table.TableName,
+                    RowCount = e.RowCount,
+                    Fields = table.Columns
+                        .Where(x => !x.Properties.Select(y => y.Property).Contains((int)PropertyEnum.Increment))
+                        .Select(x => new DataFieldGenerateModel
+                        {
+                            FieldName = x.ColumnName,
+                            FieldType = x.SqlType.SqlTypeName,
+                            RelationTableId = table.Relations
+                                .FirstOrDefault(r => r.TargetColumnId == x.ColumnId)
+                                ?.SourceTableId
+                        }).ToList()
+                };
+            }).ToList()
+        };
 
         return models;
     }

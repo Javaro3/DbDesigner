@@ -36,9 +36,6 @@ public class PostgreSqlColumnBuilder : IColumnBuilder
         }
 
         _script += string.Join(" ", result);
-        _script = _script.Contains("SERIAL")
-            ? "SERIAL " + _script.Replace("SERIAL", "")
-            : _script;
         return this;
     }
 

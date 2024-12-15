@@ -33,3 +33,22 @@ export const generate = async (generateModel, fileName) => {
 
   saveFile(response, fileName);
 };
+
+export const download = async (projectId, fileName) => {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${API_BASE_URL}/Project/download/${projectId}`, {
+    method: 'GET',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    }
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    const errorMessage = errorData.message || 'Failed to generate file';
+    throw new Error(errorMessage);
+  }
+
+  saveFile(response, fileName);
+};

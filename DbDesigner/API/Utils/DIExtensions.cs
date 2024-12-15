@@ -20,6 +20,7 @@ using Common.Profiles;
 using Infrastructure.Auth;
 using Infrastructure.Generator.Factories;
 using Infrastructure.Helpers;
+using Infrastructure.TcpManagers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -112,6 +113,9 @@ public static class DIExtensions
         services.AddScoped<IBaseHelper<Project, ProjectFilterDto>, ProjectHelper>();
         services.AddScoped<IFactory<IDataBaseBuilder>, DataBaseBuilderFactory>();
         services.AddScoped<IFactory<IDomainBuilder>, DomainBuilderFactory>();
+        services.AddScoped<IFactory<IOrmBuilder>, OrmBuilderFactory>();
+        services.AddScoped<IFactory<IArchitectureBuilder?>, ArchitectureFactory>();
+        services.AddScoped<ITcpManager, TcpManager>();
     }
     
     public static void AddOptions(this IServiceCollection services, IConfiguration configuration)

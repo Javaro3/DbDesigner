@@ -101,8 +101,8 @@ public class ProjectController : Controller
         return Results.File(fileBytes, "application/zip", "result.zip");
     }
     
-    [HttpGet("download")]
-    public async Task<IResult> Download([FromQuery] int projectId)
+    [HttpGet("download/{projectId:int}")]
+    public async Task<IResult> Download(int projectId)
     {
         var fileBytes = await _projectStorageDataService.GetProject(projectId);
         return Results.File(fileBytes, "application/zip", "result.zip");

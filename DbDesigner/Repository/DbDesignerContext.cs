@@ -62,9 +62,7 @@ public class DbDesignerContext : DbContext
 
     #endregion
     
-    public DbDesignerContext(
-        DbContextOptions<DbDesignerContext> options) : base(options)
-    {}
+    public DbDesignerContext(DbContextOptions<DbDesignerContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
