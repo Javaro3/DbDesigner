@@ -1,13 +1,11 @@
 ﻿using System.Security.Claims;
-using Common.Constants;
-using Common.Dtos.UserDtos;
+using Common.Dtos.User;
 using Common.Exceptions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Service.DataServicies;
+using Service.Interfaces.Infrastructure.DataServices;
 
 namespace API.Controllers;
 
@@ -15,50 +13,49 @@ namespace API.Controllers;
 [Route("[controller]")]
 public class AuthController : Controller
 {
-    private readonly AuthService _authService;
+    private readonly IAuthDataService _authDataService;
 
-    public AuthController(AuthService authService)
+    public AuthController(IAuthDataService authDataService)
     {
-        _authService = authService;
+        _authDataService = authDataService;
     }
     
-    [HttpPost("/login")]
+    [HttpPost("login")]
     public async Task<IResult> Login(UserLoginDto dto)
     {
         try
         {
-            var jwt = await _authService.LoginAsync(dto);
-            HttpContext.Response.Cookies.Append("jwt", jwt);
-            return Results.Ok();
+            var token = await _authDataService.LoginAsync(dto);
+            return Results.Json(token);
         }
-        catch (ValidationException e)
+        catch (ExceptionModel e)
         {
-            return Results.BadRequest(e.ValidationResult);
+            return Results.BadRequest(e.Model);
         }
     }
 
-    [HttpPost("/register")]
+    [HttpPost("register")]
     public async Task<IResult> Register(UserRegisterDto dto)
     {
         try
         {
-            await _authService.RegisterAsync(dto);
-            return Results.Ok();
+            await _authDataService.RegisterAsync(dto);
+            return Results.Ok("You have successfully registered!");
         }
-        catch (ValidationException e)
+        catch (ExceptionModel e)
         {
-            return Results.BadRequest(e.ValidationResult);
+            return Results.BadRequest(e.Model);
         }
     }
 
-    [HttpGet("/google-login")]
+    [HttpGet("google-login")]
     public IResult GoogleLogin()
     {
         var properties = new AuthenticationProperties { RedirectUri = Url.Action("GoogleResponse") };
         return Results.Challenge(properties, [GoogleDefaults.AuthenticationScheme]);
     }
 
-    [HttpGet("/google-response")]
+    [HttpGet("google-response")]
     public async Task<IResult> GoogleResponse()
     {
         var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -70,22 +67,12 @@ public class AuthController : Controller
         
         try
         {
-            var jwt = await _authService.GoogleLoginAsync(name, email);
-            HttpContext.Response.Cookies.Append("jwt", jwt);
-            return Results.Ok();
+            var token = await _authDataService.GoogleLoginAsync(name, email);
+            return Results.Json(token);
         }
-        catch (ValidationException e)
+        catch (ExceptionModel e)
         {
-            return Results.BadRequest(e.ValidationResult);
+            return Results.BadRequest(e.Model);
         }
-    }
-    
-    [HttpPost("/logout")]
-    [Authorize(Policy.Auth.Logout)]
-    public async Task<IResult> Logout()
-    {
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        HttpContext.Response.Cookies.Delete("jwt");
-        return Results.Ok("Successfully logged out");
     }
 }

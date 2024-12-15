@@ -1,4 +1,4 @@
-﻿using Service.Interfaces.Infrastructure.Auth;
+﻿using Service.Interfaces.Infrastructure.Infrastructure;
 
 namespace Infrastructure.Auth;
 

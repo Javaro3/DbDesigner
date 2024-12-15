@@ -5,7 +5,7 @@ using Common.Domain;
 using Common.Options;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Service.Interfaces.Infrastructure.Auth;
+using Service.Interfaces.Infrastructure.Infrastructure;
 
 namespace Infrastructure.Auth;
 
@@ -20,8 +20,9 @@ public class JwtProvider : IJwtProvider
     
     public string GenerateToken(User user)
     {
-        Claim[] claims = [new("UserId", user.Id.ToString())];
-        
+        List<Claim> claims = [new(ClaimTypes.NameIdentifier, user.Id.ToString())];
+        claims.AddRange(user.Roles.Select(role => new Claim(ClaimTypes.Role, role.Name)));
+
         var signingCredentials = new SigningCredentials(
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey)),
             SecurityAlgorithms.HmacSha256);

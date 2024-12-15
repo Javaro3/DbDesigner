@@ -13,8 +13,6 @@ public class LanguageType : BaseModel, IHasId, IHasName, IHasDescription
     public int LanguageId { get; set; }
     
     public Language? Language { get; set; }
-    
-    public int SqlTypeId { get; set; }
-    
-    public SqlType? SqlType { get; set; }
+
+    public ICollection<SqlType> SqlTypes { get; set; } = [];
 }

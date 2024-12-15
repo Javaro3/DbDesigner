@@ -1,5 +1,4 @@
 ﻿using Common.Domain.BaseDomain;
-using Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

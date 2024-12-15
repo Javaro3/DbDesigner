@@ -1,7 +1,5 @@
 ﻿using Common.Domain;
-using Common.Options;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Index = Common.Domain.Index;
 
 namespace Repository;
@@ -13,13 +11,9 @@ public class DbDesignerContext : DbContext
     public virtual DbSet<User> Users { get; set; }
     
     public virtual DbSet<Role> Roles { get; set; }
-
-    public virtual DbSet<Permission> Permissions { get; set; }
-
+    
     public virtual DbSet<UserRole> UserRoles { get; set; }
     
-    public virtual DbSet<RolePermission> RolePermissions { get; set; }
-
     public virtual DbSet<Architecture> Architectures { get; set; }
 
     public virtual DbSet<Column> Columns { get; set; }
@@ -57,6 +51,8 @@ public class DbDesignerContext : DbContext
     public virtual DbSet<TableColumn> TableColumns { get; set; }
     
     public virtual DbSet<SqlType> SqlTypes { get; set; }
+    
+    public virtual DbSet<LanguageTypeSqlType> LanguageTypeSqlTypes { get; set; }
 
     public virtual DbSet<UserProject> UserProjects { get; set; }
     
@@ -65,19 +61,12 @@ public class DbDesignerContext : DbContext
     public virtual DbSet<LanguageType> LanguageTypes { get; set; }
 
     #endregion
-
-    private readonly IOptions<AuthOptions> _authorizationOptions;
     
-    public DbDesignerContext(
-        DbContextOptions<DbDesignerContext> options, 
-        IOptions<AuthOptions> authorizationOptions) : base(options)
-    {
-        _authorizationOptions = authorizationOptions;
-    }
+    public DbDesignerContext(DbContextOptions<DbDesignerContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ConfigureRelations();
-        modelBuilder.ConfigureData(_authorizationOptions.Value);
+        modelBuilder.ConfigureData();
     }
 }
