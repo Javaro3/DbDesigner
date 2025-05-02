@@ -1,8 +1,0 @@
-CREATE {{ if index.index_type_id != 3 }}{{ index.index_type_name }} {{ end }}
-{{- "INDEX " -}}
-{{ $"idx_{index.id}_{index.index_type_id}" }}
-{{- " ON" -}}
-{{- $" `{index.table_name}`" -}}
-({{- index.column_names | array.join ", " -}});
-{{- if !(index.description | string.empty) -}}{{- $" -- {index.description}" -}}{{- end -}}
-{{ "" }}

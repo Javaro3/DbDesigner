@@ -1,5 +1,0 @@
-ALTER TABLE {{ $"[{relation.target_column.table_name}]" }}
-ADD CONSTRAINT {{ $"fk_{relation.id}" }}
-FOREIGN KEY ({{ relation.target_column.name }}) REFERENCES {{ $"[{relation.source_column.table_name}]" }}({{ relation.source_column.name }})
-ON DELETE {{ relation.on_delete_name }}
-ON UPDATE {{ relation.on_update_name }};
