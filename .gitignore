@@ -348,7 +348,7 @@ dist-ssr
 *.njsproj
 *.sw?
 
-# MsSql/*
-# MySql/*
-# PostgreSql/*
-# SqLite/*
+MsSql/*
+MySql/*
+PostgreSql/*
+SqLite/*
