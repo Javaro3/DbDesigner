@@ -52,13 +52,13 @@ export default function RoleEdit() {
       await update('Role', role);
       navigate('/roles');
     } catch (error) {
-      console.error("Error updating architecture:", error);
+      console.error("Error updating role:", error);
     }
   };
 
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
-      <h2 className="text-2xl font-semibold text-gray-700 mb-6">Edit Role</h2>
+      <h2 className="text-2xl font-semibold text-gray-700 mb-6">{id != 0? 'Edit Role' : 'Add Role'}</h2>
       {loading ? (
         <Loader />
       ) : (

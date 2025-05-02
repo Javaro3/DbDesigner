@@ -2,7 +2,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useAuth } from '../hooks/AuthContext';
 
-export default function MainLayout({ children, showHeader = true, showFooter = true }) {
+export default function MainLayout({ children, showHeader = true, showFooter = false }) {
   const { getUserRole } = useAuth();
 
   return (

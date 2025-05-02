@@ -24,11 +24,13 @@ import UserEdit from './pages/User/UserEdit';
 import UserAdd from './pages/User/UserAdd';
 import SqlTypeList from './pages/SqlType/SqlTypeList';
 import SqlTypeEdit from './pages/SqlType/SqlTypeEdit';
-import LanguageTypeList from './pages/LanguageType/LanguageTypeList';
-import LanguageTypeEdit from './pages/LanguageType/LanguageTypeEdit';
 import ProjectEdit from './pages/Project/ProjectEdit';
 import ProjectList from './pages/Project/ProjectList';
 import ProjectDiagram from './pages/Project/ProjectDiagram';
+import GenerationModelList from './pages/GenerationModel/GenerationModelList';
+import GenerationModelEdit from './pages/GenerationModel/GenerationModelEdit';
+import GenerationLanguageList from './pages/GenerationLanguages/GenerationLanguageList';
+import GenerationLanguageEdit from './pages/GenerationLanguages/GenerationLanguageEdit';
 
 function AppRouter() {
   return (
@@ -37,9 +39,41 @@ function AppRouter() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
+        <Route path="/generationModels" element={
+          <PrivateRoute allowedRole={'Administrator'}>
+            <MainLayout showHeader={true} showFooter={false}>
+              <GenerationModelList />
+            </MainLayout>
+          </PrivateRoute>}
+        />
+
+        <Route path="/editGenerationModel/:id" element={
+          <PrivateRoute allowedRole={'Administrator'}>
+            <MainLayout showHeader={true} showFooter={false}>
+              <GenerationModelEdit />
+            </MainLayout>
+          </PrivateRoute>}
+        />
+
+        <Route path="/generationLanguages" element={
+          <PrivateRoute allowedRole={'Administrator'}>
+            <MainLayout showHeader={true} showFooter={false}>
+              <GenerationLanguageList />
+            </MainLayout>
+          </PrivateRoute>}
+        />
+
+        <Route path="/editGenerationLanguage/:id" element={
+          <PrivateRoute allowedRole={'Administrator'}>
+            <MainLayout showHeader={true} showFooter={false}>
+              <GenerationLanguageEdit />
+            </MainLayout>
+          </PrivateRoute>}
+        />
+
         <Route path="/architectures" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <ArchitectureList />
             </MainLayout>
           </PrivateRoute>}
@@ -47,7 +81,7 @@ function AppRouter() {
 
         <Route path="/editArchitecture/:id" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <ArchitectureEdit />
             </MainLayout>
           </PrivateRoute>}
@@ -55,7 +89,7 @@ function AppRouter() {
 
         <Route path="/databases" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <DataBaseList />
             </MainLayout>
           </PrivateRoute>}
@@ -63,7 +97,7 @@ function AppRouter() {
 
         <Route path="/editDatabase/:id" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <DataBaseEdit />
             </MainLayout>
           </PrivateRoute>}
@@ -71,7 +105,7 @@ function AppRouter() {
 
         <Route path="/languages" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <LanguageList />
             </MainLayout>
           </PrivateRoute>}
@@ -79,7 +113,7 @@ function AppRouter() {
 
         <Route path="/editLanguage/:id" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <LanguageEdit />
             </MainLayout>
           </PrivateRoute>}
@@ -87,7 +121,7 @@ function AppRouter() {
 
         <Route path="/roles" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <RoleList />
             </MainLayout>
           </PrivateRoute>}
@@ -95,7 +129,7 @@ function AppRouter() {
 
         <Route path="/editRole/:id" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <RoleEdit />
             </MainLayout>
           </PrivateRoute>}
@@ -103,7 +137,7 @@ function AppRouter() {
 
         <Route path="/relationActions" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <RelationActionList />
             </MainLayout>
           </PrivateRoute>}
@@ -111,7 +145,7 @@ function AppRouter() {
 
         <Route path="/editRelationAction/:id" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <RelationActionEdit />
             </MainLayout>
           </PrivateRoute>}
@@ -119,7 +153,7 @@ function AppRouter() {
 
         <Route path="/indexTypes" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <IndexTypeList />
             </MainLayout>
           </PrivateRoute>}
@@ -127,7 +161,7 @@ function AppRouter() {
 
         <Route path="/editIndexType/:id" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <IndexTypeEdit />
             </MainLayout>
           </PrivateRoute>}
@@ -135,7 +169,7 @@ function AppRouter() {
 
         <Route path="/orms" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <OrmList />
             </MainLayout>
           </PrivateRoute>}
@@ -143,7 +177,7 @@ function AppRouter() {
 
         <Route path="/editOrm/:id" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <OrmEdit />
             </MainLayout>
           </PrivateRoute>}
@@ -151,7 +185,7 @@ function AppRouter() {
 
         <Route path="/properties" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <PropertyList />
             </MainLayout>
           </PrivateRoute>}
@@ -159,7 +193,7 @@ function AppRouter() {
 
         <Route path="/editProperty/:id" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <PropertyEdit />
             </MainLayout>
           </PrivateRoute>}
@@ -167,7 +201,7 @@ function AppRouter() {
 
         <Route path="/users" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <UserList />
             </MainLayout>
           </PrivateRoute>}
@@ -175,7 +209,7 @@ function AppRouter() {
 
         <Route path="/editUser/:id" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <UserEdit />
             </MainLayout>
           </PrivateRoute>}
@@ -183,7 +217,7 @@ function AppRouter() {
 
         <Route path="/addUser" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <UserAdd />
             </MainLayout>
           </PrivateRoute>}
@@ -191,7 +225,7 @@ function AppRouter() {
 
         <Route path="/sqlTypes" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <SqlTypeList />
             </MainLayout>
           </PrivateRoute>}
@@ -199,31 +233,15 @@ function AppRouter() {
 
         <Route path="/editSqlType/:id" element={
           <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <SqlTypeEdit />
             </MainLayout>
           </PrivateRoute>}
         />
 
-        <Route path="/languageTypes" element={
-          <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
-              <LanguageTypeList />
-            </MainLayout>
-          </PrivateRoute>}
-        />
-
-        <Route path="/editLanguageType/:id" element={
-          <PrivateRoute allowedRole={'Administrator'}>
-            <MainLayout showHeader={true} showFooter={true}>
-              <LanguageTypeEdit />
-            </MainLayout>
-          </PrivateRoute>}
-        />
-
-        <Route path="/home" element={
+        <Route path="/" element={
           <PrivateRoute allowedRole={'User'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <ProjectList />
             </MainLayout>
           </PrivateRoute>}
@@ -239,7 +257,7 @@ function AppRouter() {
 
         <Route path="/addProject" element={
           <PrivateRoute allowedRole={'User'}>
-            <MainLayout showHeader={true} showFooter={true}>
+            <MainLayout showHeader={true} showFooter={false}>
               <ProjectEdit />
             </MainLayout>
           </PrivateRoute>}

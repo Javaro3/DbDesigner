@@ -1,0 +1,8 @@
+{{ column.name }} {{ column.sql_type_name }} 
+{{- if column.sql_type_has_params -}}({{ column.sql_type_params }}){{- end -}}
+{{~ for property in column.properties ~}}
+ {{ property.property_name }}{{ if property.sql_type_has_params }} ({{ property.property_params }}){{- end -}}
+{{~ end ~}}
+{{ if (table.columns | array.last).id != column.id }}{{ "," }}{{- end -}}
+{{- if column.description != null -}}{{- $" -- {column.description}" -}}{{- end -}}
+{{ "" }}

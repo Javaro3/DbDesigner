@@ -12,15 +12,3 @@ export const create = async (model) => {
     });
   return response.status;
 };
-
-export const getForComboboxWithoutCurrent = async () => {
-  const token = localStorage.getItem('token');
-  const response = await fetch(`${API_BASE_URL}/User/get-combobox-without-current`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    }
-    });
-  return response.json();
-};

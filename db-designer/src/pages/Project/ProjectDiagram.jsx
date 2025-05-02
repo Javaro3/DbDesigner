@@ -3,7 +3,7 @@ import TableNode from '../../components/UI/flow/TableNode';
 import TableCard from '../../components/UI/cards/TableCard';
 import GenerateCard from '../../components/UI/cards/GenerateCard';
 import Button from '../../components/UI/buttons/Button';
-import { deleteById, getForCombobox } from '../../utils/apiHelper';
+import { deleteById, getForCombobox, update } from '../../utils/apiHelper';
 import { getSqlTypeForComboboxByDatabase } from '../../services/sqlTypeService';
 import { getIndexTypeForComboboxByDatabase } from '../../services/indexTypeService';
 import ReactFlow, { Background, Controls, ReactFlowProvider, addEdge, useEdgesState, useNodesState } from 'react-flow-renderer';
@@ -11,15 +11,16 @@ import TableEdge from '../../components/UI/flow/TableEdge';
 import Loader from '../../components/UI/loaders/Loader';
 import { useParams } from 'react-router-dom';
 import { getForDiagram } from '../../services/projectService';
-import { addTableToProject } from '../../services/tableService';
-import { addRelationToProject } from '../../services/relationService';
 import Modal from '../../components/UI/modal/Modal';
+import SqlScriptEditorCard from '../../components/UI/cards/SqlScriptEditorCard';
+import { getPropertyForComboboxByDatabase } from '../../services/propertyService';
 
 
 export default function ProjectDiagram() {
   const { id } = useParams();
   const [dataBaseId, setDataBaseId] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalSqlScriptEditorCardOpen, setIsModalSqlScriptEditorCardOpen] = useState(false);
+  const [isModalGenerateCardOpen, setIsModalGenerateCardOpen] = useState(false);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [sqlTypeCombobox, setSqlTypeCombobox] = useState([]);
@@ -55,7 +56,7 @@ export default function ProjectDiagram() {
       const project = await getForDiagram(id);
       setDataBaseId(project.dataBase.id);
       const sqlTypes = await getSqlTypeForComboboxByDatabase(project.dataBase.id);
-      const properties = await getForCombobox('Property');
+      const properties = await getPropertyForComboboxByDatabase(project.dataBase.id);
       const indexTypes = await getIndexTypeForComboboxByDatabase(project.dataBase.id);
       const relationActions = await getForCombobox('RelationAction');
       setSqlTypeCombobox(sqlTypes);
@@ -80,7 +81,9 @@ export default function ProjectDiagram() {
                 sqlTypeParams: column.sqlTypeParams,
                 properties: column.properties.map(property => {
                   return {
+                    id: property.id,
                     propertyId: property.propertyId,
+                    columnId: property.columnId,
                     propertyParams: property.propertyParams
                   }
                 })
@@ -163,7 +166,7 @@ export default function ProjectDiagram() {
   }, []);
 
   const addNode = async () => {
-    const newTable = await addTableToProject({id: 0, name: '', description: ''}, id);
+    const newTable = await update('Table', {id: 0, name: '', description: '', projectId: id});
 
     const node = {
       id: String(newTable.id),
@@ -228,7 +231,7 @@ export default function ProjectDiagram() {
     const targetHandle = JSON.parse(connection.targetHandle);
 
     const relation = {sourceColumnId: sourceHandle.column.id, targetColumnId: targetHandle.column.id, onDeleteId: 1, onUpdateId: 1};
-    const newRelation = await addRelationToProject(relation);
+    const newRelation = await update('Relation', relation);
 
     const edge = {...connection,
       id: String(newRelation.id),
@@ -252,31 +255,48 @@ export default function ProjectDiagram() {
   }, [])
 
   function onSave() {
-    setIsModalOpen(true);
+    setIsModalSqlScriptEditorCardOpen(true);
   }
 
   return (
     <ReactFlowProvider>
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} size="large">
+      <Modal
+        isOpen={isModalGenerateCardOpen}
+        onClose={() => setIsModalGenerateCardOpen(false)}
+        size="large"
+      >
           <GenerateCard
             projectId={id}
             dataBaseId={dataBaseId}
             tables={nodes.map(e => e.data)}/>
       </Modal>
+
+      <Modal
+        isOpen={isModalSqlScriptEditorCardOpen}
+        onClose={() => setIsModalSqlScriptEditorCardOpen(false)}
+        size="large"
+      >
+        <SqlScriptEditorCard projectId={id}
+          openGenerateCard={() => {
+            setIsModalSqlScriptEditorCardOpen(false);
+            setIsModalGenerateCardOpen(true);
+          }}/>
+      </Modal>
       <div className="flex" style={{ height: '95vh' }}>
         <div className="w-1/4 bg-gray-200 p-3 flex flex-col items-center">
           <div className="flex justify-between w-full gap-2">
             <Button onClick={addNode} className="w-1/2" disabled={loading}>
-              {loading ? (<Loader/>) : (<i class="fa-solid fa-plus"></i>)}
+              {loading ? (<Loader/>) : (<i className="fa-solid fa-plus"></i>)}
             </Button>
             <Button onClick={onSave} className="w-1/2" disabled={loading}>
-              {loading ? (<Loader/>) : (<i class="fa-solid fa-sliders"></i>)}
+              {loading ? (<Loader/>) : (<i className="fa-solid fa-sliders"></i>)}
             </Button>
           </div>
 
           <div className="w-full pt-3 overflow-y-auto">
             {nodes.map((node) => (
               <TableCard
+                projectId={id}
                 key={node.data.id}
                 node={node.data}
                 onModelChange={onNodeChange}

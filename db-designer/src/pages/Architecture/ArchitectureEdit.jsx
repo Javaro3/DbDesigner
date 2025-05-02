@@ -58,7 +58,7 @@ export default function ArchitectureEdit() {
 
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
-      <h2 className="text-2xl font-semibold text-gray-700 mb-6">Edit Architecture</h2>
+      <h2 className="text-2xl font-semibold text-gray-700 mb-6">{id != 0? 'Edit Architecture' : 'Add Architecture'}</h2>
       {loading ? (
         <Loader />
       ) : (

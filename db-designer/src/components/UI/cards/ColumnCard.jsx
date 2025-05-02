@@ -4,9 +4,8 @@ import Button from '../buttons/Button';
 import ComboBox from '../inputs/ComboBox';
 import PropertyCard from './PropertyCard';
 import { deleteById, update } from '../../../utils/apiHelper';
-import { addPropertyToColumn, deletePropertyFromColumn } from '../../../services/columnPropertyService';
 
-const ColumnCard = ({ model, onDelete, onColumnChange, sqlTypeCombobox, propertyCombobox }) => {
+const ColumnCard = ({ model, tableId, onDelete, onColumnChange, sqlTypeCombobox, propertyCombobox }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
@@ -54,18 +53,19 @@ const ColumnCard = ({ model, onDelete, onColumnChange, sqlTypeCombobox, property
       name: model.name,
       description: model.description,
       sqlTypeId: model.sqlTypeId,
-      sqlTypeParams: model.sqlTypeParams
+      sqlTypeParams: model.sqlTypeParams,
+      tableId: tableId
     };
 
     await update('Column', column);
   }
 
-  const updateProperty = async (property, prevPropertyId) => {
+  const updateProperty = async (property) => {
     const columnProperty = {
+      id: property.id,
       propertyId: property.propertyId,
       columnId: model.id,
       propertyParams: property.propertyParams,
-      prevPropertyId: prevPropertyId
     };
 
     await update('ColumnProperty', columnProperty);
@@ -79,21 +79,23 @@ const ColumnCard = ({ model, onDelete, onColumnChange, sqlTypeCombobox, property
     setPropertyError('');
     
     const newProperty = {
+      id: 0,
+      columnId: model.id,
       propertyId: propertyCombobox.find(e => !model.properties.map(x => x.propertyId).includes(e.id)).id,
       propertyParams: ''
     };
 
-    await addPropertyToColumn(newProperty, model.id);
+    var newPropertyId = (await update('ColumnProperty', newProperty)).id;
+    newProperty.id = newPropertyId;
     model.properties.push(newProperty);
     onColumnChange(model);
   };
 
-  const onPropertyDelete = async(propertyId) => {
+  const onPropertyDelete = async(id) => {
     setPropertyError('');
-    const newProperties = model.properties.filter(e => e.propertyId != propertyId);
+    const newProperties = model.properties.filter(e => e.id != id);
     model.properties = newProperties;
-    await deletePropertyFromColumn({propertyId: propertyId, columnId: model.id});
-    
+    await deleteById('ColumnProperty', id);
     onColumnChange(model);
   };
 
@@ -146,7 +148,7 @@ const ColumnCard = ({ model, onDelete, onColumnChange, sqlTypeCombobox, property
                     properties={model.properties}
                     setPropertyError={setPropertyError}
                     onPropertyChange={handlePropertyChange}
-                    onDelete={() => onPropertyDelete(property.propertyId)}
+                    onDelete={() => onPropertyDelete(property.id)}
                     propertyCombobox={propertyCombobox}
                     updateProperty={updateProperty} />
             ))))}
