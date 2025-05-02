@@ -1,7 +1,7 @@
-mounts/MsSql/*
-mounts/MySql/*
-mounts/PostgreSql/*
-mounts/SqLite/*
+/mounts/MsSql/*
+/mounts/MySql/*
+/mounts/PostgreSql/*
+/mounts/SqLite/*
 projects/*
 
 db-designer/node_modules/
