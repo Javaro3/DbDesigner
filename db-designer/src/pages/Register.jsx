@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useAuth } from '../hooks/AuthContext';
 import Input from '../components/UI/inputs/Input';
 import Button from '../components/UI/buttons/Button';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import GoogleIcon from '@mui/icons-material/Google';
 import { validateEmail, validateEmpty, validatePassword } from '../utils/validators';
 import Loader from '../components/UI/loaders/Loader';
 
@@ -42,6 +43,12 @@ export default function Register() {
       setLoading(false);
     }
   };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    loginWithGoogle();
+    setLoading(false);
+  }
 
   const handleNameChange = (e) => {
     setError('');
@@ -107,6 +114,30 @@ export default function Register() {
           )}
 
           <Button type="submit" className="w-full mt-4">Register</Button>
+
+          <div className="flex items-center my-4">
+            <div className="flex-grow border-t border-gray-300"></div>
+            <span className="mx-4 text-gray-500">or</span>
+            <div className="flex-grow border-t border-gray-300"></div>
+          </div>
+
+          <Button 
+            onClick={handleGoogleLogin}
+            className="w-full flex items-center justify-center gap-2 mb-4"
+          >
+            <GoogleIcon className="text-xl" />
+            Continue with Google
+          </Button>
+
+          <div className="text-center mt-4">
+            <span className="text-gray-600">Already have an account? </span>
+            <Link 
+              to="/login" 
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Login
+            </Link>
+          </div>
         </form>
       )}
     </div>
