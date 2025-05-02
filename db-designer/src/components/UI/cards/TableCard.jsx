@@ -4,10 +4,8 @@ import Button from '../buttons/Button';
 import ColumnCard from './ColumnCard';
 import IndexCard from './IndexCard';
 import { deleteById, update } from '../../../utils/apiHelper';
-import { addColumnToTable } from '../../../services/columnService';
-import { addIndexToTable } from '../../../services/indexService';
 
-const TableCard = ({ node, onModelChange, onDelete }) => {
+const TableCard = ({ projectId, node, onModelChange, onDelete }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -36,14 +34,15 @@ const TableCard = ({ node, onModelChange, onDelete }) => {
     const table = {
       id: node.id,
       name: node.name,
-      description: node.description
+      description: node.description,
+      projectId: projectId
     };
 
     await update('Table', table);
   }
 
   const addColumn = async () => {
-    const newColumn = await addColumnToTable({id: 0, sqlTypeId: node.sqlTypeCombobox[0].id}, node.id);
+    const newColumn = await update('Column', {id: 0, sqlTypeId: node.sqlTypeCombobox[0].id, tableId: node.id});
     node.columns.push(newColumn);
     onModelChange(node);
   };
@@ -75,7 +74,7 @@ const TableCard = ({ node, onModelChange, onDelete }) => {
   };
 
   const addIndex = async () => {
-    const newIndex = await addIndexToTable({
+    const newIndex = await update('Index', {
       id: 0,
       description: '',
       indexTypeId: node.indexTypeCombobox[0].id,
@@ -131,6 +130,7 @@ const TableCard = ({ node, onModelChange, onDelete }) => {
                 <ColumnCard
                   key={i}
                   model={column}
+                  tableId={node.id}
                   onDelete={() => onColumnDelete(column.id)}
                   onColumnChange={handleColumnChange}
                   sqlTypeCombobox={node.sqlTypeCombobox}

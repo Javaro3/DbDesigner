@@ -17,16 +17,25 @@
     "start:all": "concurrently 'npm run start:api' 'npm run start:client' 'npm run start:chatGptWorkers' 'npm run start:chatGptServer'"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@fortawesome/fontawesome-free": "^6.6.0",
+    "@monaco-editor/react": "^4.7.0",
+    "@mui/icons-material": "^6.4.6",
+    "@mui/material": "^6.4.6",
+    "@mui/x-data-grid": "^7.27.1",
     "ag-grid-community": "^32.3.1",
     "ag-grid-enterprise": "^32.3.1",
     "ag-grid-react": "^32.3.1",
     "concurrently": "^9.1.0",
+    "date-fns": "^4.1.0",
     "jwt-decode": "^4.0.0",
+    "monaco-editor": "^0.52.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-flow-renderer": "^10.3.17",
-    "react-router-dom": "^6.27.0"
+    "react-router-dom": "^6.27.0",
+    "sql-formatter": "^15.4.11"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",

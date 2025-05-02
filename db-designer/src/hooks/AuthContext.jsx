@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from 'react';
 import * as authService from '../services/authService';
 import { jwtDecode } from 'jwt-decode';
+import { API_BASE_URL } from '../utils/apiHelper';
 
 const AuthContext = createContext();
 
@@ -19,6 +20,10 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const loginWithGoogle = () => {
+    window.location = `${API_BASE_URL}/Auth/google-login`;
+  };
+
   const register = async (name, email, password) => {
     try {
       await authService.register(name, email, password);
@@ -31,7 +36,16 @@ export function AuthProvider({ children }) {
     if (token) {
       const decodedToken = jwtDecode(token);
       var roles = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-      return roles instanceof Array ? roles : [roles];;
+      return roles instanceof Array ? roles : [roles];
+    }
+    return null;
+  };
+
+  const getUserId = () => {
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      var id = decodedToken["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+      return id
     }
     return null;
   };
@@ -42,7 +56,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, register, logout, getUserRole }}>
+    <AuthContext.Provider value={{ token, login, loginWithGoogle, register, logout, getUserRole, getUserId }}>
       {children}
     </AuthContext.Provider>
   );

@@ -6,24 +6,36 @@ import { getOrmForComboboxByLanguage } from '../../../services/ormService';
 import { validateEmpty, validateNumber } from '../../../utils/validators';
 import Checkbox from '../inputs/Checkbox';
 import Input from '../inputs/Input';
-import { generate } from '../../../services/projectService';
 import Loader from '../loaders/Loader';
+import { download, generateDalAndTestData } from '../../../services/projectService';
 
 const GenerateCard = ({projectId, dataBaseId, tables}) => {
   const [languageCombobox, setLanguageCombobox] = useState([]);
   const [language, setLanguage] = useState(0);
   const [languageError, setLanguageError] = useState('');
-  const [loading, setLoading] = useState(false);
-
+  
   const [ormCombobox, setOrmCombobox] = useState([]);
   const [orm, setOrm] = useState(0);
   const [ormError, setOrmError] = useState('');
-
+  
   const [architectureCombobox, setArchitectureCombobox] = useState([]);
   const [architecture, setArchitecture] = useState(0);
   const [architectureError, setArchitectureError] = useState('');
 
+  const [generationLanguageCombobox, setGenerationLanguageCombobox] = useState([]);
+  const [generationLanguage, setGenerationLanguage] = useState(0);
+  const [generationLanguageError, setGenerationLanguageError] = useState('');
+
+  const [generationModelCombobox, setGenerationModelCombobox] = useState([]);
+  const [generationModel, setGenerationModel] = useState(0);
+  const [generationModelError, setGenerationModelError] = useState('');
+  
   const [tableGenerateInfos, setTableGenerateInfos] = useState(tables.map(e => ({tableId: e.id, rowCount: '', isNeedToGenerate: false, error: ''})));
+  const [errors, setErrors] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const [generateTestData, setGenerateTestData] = useState(false);
+  const [generateDal, setGenerateDal] = useState(false);
 
   useEffect(() => {
     const fetchLanguages = async () => {
@@ -33,12 +45,17 @@ const GenerateCard = ({projectId, dataBaseId, tables}) => {
       setOrmCombobox(orms);
       const architectures = await getForCombobox('Architecture');
       setArchitectureCombobox(architectures);
+      const generationLanguages = await getForCombobox('GenerationLanguage');
+      setGenerationLanguageCombobox(generationLanguages);
+      const generationModels = await getForCombobox('GenerationModel');
+      setGenerationModelCombobox(generationModels);
     };
 
     fetchLanguages();
   }, []);
 
   async function handleLanguage(e) {
+    setErrors('');
     setLanguageError('');
     setLanguage(e);
     if (e !== language) {
@@ -49,16 +66,38 @@ const GenerateCard = ({projectId, dataBaseId, tables}) => {
   }
 
   function handleOrm(e) {
+    setErrors('');
     setOrmError('');
     setOrm(e);
   }
 
   function handleArchitecture(e) {
+    setErrors('');
     setArchitectureError('');
     setArchitecture(e);
   }
 
+  function handleGenerationLanguage(e) {
+    setErrors('');
+    setGenerationLanguageError('');
+    setGenerationLanguage(e);
+  }
+
+  function handleGenerationModel(e) {
+    setErrors('');
+    setGenerationModelError('');
+    setGenerationModel(e);
+  }
+
+  async function handleDownload() {
+    setErrors('');
+    setLoading(true);
+    await download(projectId);
+    setLoading(false);
+  }
+
   function handleTableGenerateCount(tableId, rowCount){
+    setErrors('');
     const validate = validateNumber(rowCount, tableId, 1, 100);
     if (!validate) {
       setTableGenerateInfos(tableGenerateInfos.map(e => {
@@ -72,6 +111,7 @@ const GenerateCard = ({projectId, dataBaseId, tables}) => {
   }
 
   function handleTableIsNeedToGenerate(tableId, value) {
+    setErrors('');
     setTableGenerateInfos(tableGenerateInfos.map(e => {
       if (e.tableId == tableId) {
         e.error = '';
@@ -85,25 +125,32 @@ const GenerateCard = ({projectId, dataBaseId, tables}) => {
   }
 
   async function handleSave() {
+    setErrors('');
     const languageValidationError = validateEmpty(language, 'Language');
     const ormValidationError = validateEmpty(orm, 'Orm');
     const architectureValidationError = validateEmpty(architecture, 'Architecture');
+    const generationLanguageValidationError = validateEmpty(generationLanguage, 'GenerationLanguage');
+    const generationModelValidationError = validateEmpty(generationModel, 'GenerationModel');
 
-    setLanguageError(languageValidationError);
-    setOrmError(ormValidationError);
-    setArchitectureError(architectureValidationError);
+    if (generateDal) {
+      setLanguageError(languageValidationError);
+      setOrmError(ormValidationError);
+      setArchitectureError(architectureValidationError);
+    }
+    
+    if (generateTestData) {
+      setGenerationLanguageError(generationLanguageValidationError);
+      setGenerationModelError(generationModelValidationError);
+      setTableGenerateInfos(tableGenerateInfos.map(e => {
+        if (e.isNeedToGenerate && !e.rowCount) {
+          e.error = 'Count cannot be empty';
+        }
+        return e;
+      }));
+    }
 
-    setTableGenerateInfos(tableGenerateInfos.map(e => {
-      if (e.isNeedToGenerate && !e.rowCount) {
-        e.error = 'Count cannot be empty';
-      }
-      return e;
-    }));
-
-    if (languageValidationError ||
-      ormValidationError ||
-      architectureValidationError ||
-      tableGenerateInfos.some(e => e.isNeedToGenerate && !e.rowCount)) {
+    if ((generateDal && (languageValidationError || ormValidationError || architectureValidationError)) ||
+      (generateTestData && (generationLanguageValidationError || generationModelValidationError) || tableGenerateInfos.some(e => e.isNeedToGenerate && !e.rowCount))) {
       return;
     }
 
@@ -113,11 +160,16 @@ const GenerateCard = ({projectId, dataBaseId, tables}) => {
       languageId: language,
       ormId: orm,
       architectureId: architecture,
-      tableGenerateInfos: tableGenerateInfos.filter(e => e.isNeedToGenerate).map(e => ({tableId: e.tableId, rowCount: e.rowCount}))
+      generationLanguageId: generationLanguage,
+      generationModelId: generationModel,
+      generateTestData: generateTestData,
+      generateDal: generateDal,
+      tableGenerateInfos: tableGenerateInfos.filter(e => e.isNeedToGenerate).map(e => ({tableId: e.tableId, rowCount: Number(e.rowCount)}))
     };
 
     setLoading(true);
-    await generate(model, 'result.zip');
+    const result = await generateDalAndTestData(model);
+    setErrors(result.errors);
     setLoading(false);
   }
 
@@ -130,39 +182,81 @@ const GenerateCard = ({projectId, dataBaseId, tables}) => {
         : (
             <div className="flex flex-grow">
               <div className="w-1/2 pr-2">
-                <h2 className="text-xl mb-1 ml-1">Language</h2>
-                <ComboBox
-                  options={languageCombobox}
-                  selected={language}
-                  onChange={handleLanguage}
-                  placeholder="Select a Language"
-                  error={languageError}
+                { generateDal ? (
+                <>
+                  <h2 className="text-xl mb-1 ml-1">Language</h2>
+                  <ComboBox
+                    options={languageCombobox}
+                    selected={language}
+                    onChange={handleLanguage}
+                    placeholder="Select a Language"
+                    error={languageError}
+                    className="mb-1"
+                  />
+
+                  <h2 className="text-xl mb-1 ml-1">Orm</h2>
+                  <ComboBox
+                    options={ormCombobox}
+                    selected={orm}
+                    onChange={handleOrm}
+                    placeholder="Select an Orm"
+                    error={ormError}
+                    className="mb-1"
+                  />
+
+                  <h2 className="text-xl mb-1 ml-1">Architecture</h2>
+                  <ComboBox
+                    options={architectureCombobox}
+                    selected={architecture}
+                    onChange={handleArchitecture}
+                    placeholder="Select an Architecture"
+                    error={architectureError}
+                    className="mb-1"
+                  />
+                </>
+                ) : <></>}
+
+                { generateTestData ? (
+                <>
+                  <h2 className="text-xl mb-1 ml-1">Language for generation</h2>
+                  <ComboBox
+                    options={generationLanguageCombobox}
+                    selected={generationLanguage}
+                    onChange={handleGenerationLanguage}
+                    placeholder="Select an language"
+                    error={generationLanguageError}
+                    className="mb-1"
+                  />
+
+                  <h2 className="text-xl mb-1 ml-1">Model for generation</h2>
+                  <ComboBox
+                    options={generationModelCombobox}
+                    selected={generationModel}
+                    onChange={handleGenerationModel}
+                    placeholder="Select an model"
+                    error={generationModelError}
+                    className="mb-1"
+                  />
+                </>
+                ) : <></>}
+
+                <Checkbox
+                  label={"Generate DAL"}
+                  checked={generateDal}
+                  onChange={(e) => setGenerateDal(e.target.checked)}
                   className="mb-1"
                 />
 
-                <h2 className="text-xl mb-1 ml-1">Orm</h2>
-                <ComboBox
-                  options={ormCombobox}
-                  selected={orm}
-                  onChange={handleOrm}
-                  placeholder="Select an Orm"
-                  error={ormError}
-                  className="mb-1"
-                />
-
-                <h2 className="text-xl mb-1 ml-1">Architecture</h2>
-                <ComboBox
-                  options={architectureCombobox}
-                  selected={architecture}
-                  onChange={handleArchitecture}
-                  placeholder="Select an Architecture"
-                  error={architectureError}
+                <Checkbox
+                  label={"Generate test data"}
+                  checked={generateTestData}
+                  onChange={(e) => setGenerateTestData(e.target.checked)}
                   className="mb-1"
                 />
               </div>
 
               <div className="w-1/2 pl-2">
-                {tables.map((table) => {
+                {(generateTestData ? tables : []).map((table) => {
                   const tableGenerateInfo = tableGenerateInfos.find(e => e.tableId === table.id);
                   return (<div key={table.id}>
                     <h2 className="text-xl mb-1 ml-1">{table.name}</h2>
@@ -185,20 +279,36 @@ const GenerateCard = ({projectId, dataBaseId, tables}) => {
                           className="w-full"/>
                       </div>
                     </div>
-                </div>
-                )})}
+                  </div>
+                  )})}
               </div>
             </div>
           )}
 
       {loading
       ? <></>
-      : <div className="flex justify-end mt-2">
+      : <div className="flex justify-end mt-2 gap-1">
+        {errors == null
+          ? (
+            <Button onClick={handleDownload}>
+              <i className="fa-solid fa-download"></i>
+            </Button>
+          ) : <></>}
           <Button onClick={handleSave}>
             <i className="fa-solid fa-cloud-arrow-up"></i>
           </Button>
         </div>
       }
+
+      {errors ? (
+        <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded">
+          {errors}
+        </div>
+      ) : errors == null ? (
+        <div className="mt-2 p-2 bg-green-100 border border-green-400 text-green-700 rounded">
+          The generation was successful.
+        </div>
+      ) : null}
     </div>
   );
 };

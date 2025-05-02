@@ -3,14 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Loader from '../../components/UI/loaders/Loader';
 import Input from '../../components/UI/inputs/Input';
 import Button from '../../components/UI/buttons/Button';
-import MultiComboBox from '../../components/UI/inputs/MultiComboBox';
 import { get, getForCombobox, update } from '../../utils/apiHelper';
 import { validateEmpty } from '../../utils/validators';
+import ComboBox from '../../components/UI/inputs/ComboBox';
 
 export default function OrmEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [orm, setOrm] = useState({ name: '', description: '', languages: [] });
+  const [orm, setOrm] = useState({ name: '', description: '', language: null });
   const [nameError, setNameError] = useState('');
   const [languagesError, setLanguagesError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -58,12 +58,11 @@ export default function OrmEdit() {
   };
 
   const handleLanguagesChange = (selectedOptions) => {
-    const newLanguages = languageOptions.filter(e => selectedOptions.includes(e.id));
-    const validationError = validateEmpty(newLanguages.length !== 0, 'Languages');
+    const validationError = validateEmpty(selectedOptions, 'Languages');
     setLanguagesError(validationError);
     setOrm((prev) => ({
       ...prev,
-      languages: newLanguages,
+      language: {id: selectedOptions},
     }));
   };
 
@@ -81,7 +80,7 @@ export default function OrmEdit() {
 
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
-      <h2 className="text-2xl font-semibold text-gray-700 mb-6">Edit Orm</h2>
+      <h2 className="text-2xl font-semibold text-gray-700 mb-6">{id != 0? 'Edit Orm' : 'Add Orm'}</h2>
       {loading ? (
         <Loader />
       ) : (
@@ -103,9 +102,9 @@ export default function OrmEdit() {
           </div>
           <div className="flex flex-col">
             <label className="text-gray-600 font-medium mb-2">Languages:</label>
-            <MultiComboBox
+            <ComboBox
               options={languageOptions}
-              selected={orm.languages.map(e => e.id)}
+              selected={orm.language?.id}
               onChange={handleLanguagesChange}
               error={languagesError}
             />

@@ -37,7 +37,7 @@ export async function saveFile(response, fileName) {
 
 export const getForCombobox = async (controller) => {
   const token = localStorage.getItem('token');
-  const response = await fetch(`${API_BASE_URL}/${controller}/get-combobox`, {
+  const response = await fetch(`${API_BASE_URL}/${controller}/combobox`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -48,10 +48,9 @@ export const getForCombobox = async (controller) => {
 };
 
 export const get = async (controller, id) => {
-  const queryString = toQueryString({id});
   
   const token = localStorage.getItem('token');
-  const response = await fetch(`${API_BASE_URL}/${controller}/get?${queryString}`, {
+  const response = await fetch(`${API_BASE_URL}/${controller}/${id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -63,7 +62,7 @@ export const get = async (controller, id) => {
 
 export const update = async (controller, model) => {
   const token = localStorage.getItem('token');
-  const response = await fetch(`${API_BASE_URL}/${controller}/update`, {
+  const response = await fetch(`${API_BASE_URL}/${controller}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -71,13 +70,13 @@ export const update = async (controller, model) => {
     },
     body: JSON.stringify(model)
     });
-  return response.status;
+  return response.json();
 };
 
 export const getAll = async (controller, model) => {
   const queryString = toQueryString(model);
   const token = localStorage.getItem('token');
-  const response = await fetch(`${API_BASE_URL}/${controller}/get-all?${queryString}`, {
+  const response = await fetch(`${API_BASE_URL}/${controller}?${queryString}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -88,9 +87,8 @@ export const getAll = async (controller, model) => {
 };
 
 export const deleteById = async (controller, id) => {
-  const queryString = toQueryString({id: id});
   const token = localStorage.getItem('token');
-  const response = await fetch(`${API_BASE_URL}/${controller}/delete?${queryString}`, {
+  const response = await fetch(`${API_BASE_URL}/${controller}/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',

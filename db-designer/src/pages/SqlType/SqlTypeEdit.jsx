@@ -5,17 +5,16 @@ import Input from '../../components/UI/inputs/Input';
 import Button from '../../components/UI/buttons/Button';
 import { get, getForCombobox, update } from '../../utils/apiHelper';
 import ComboBox from '../../components/UI/inputs/ComboBox';
-import MultiComboBox from '../../components/UI/inputs/MultiComboBox';
 import { validateEmpty } from '../../utils/validators';
 
 export default function SqlTypeEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [sqlType, setSqlType] = useState({ name: '', description: '', hasParams: false, dataBases: [] });
+  const [sqlType, setSqlType] = useState({ name: '', description: '', hasParams: false, dataBase: null });
   const [loading, setLoading] = useState(true);
   const [nameError, setNameError] = useState('');
-  const [databasesError, setDatabasesError] = useState('');
-  const [databaseOptions, setDatabaseOptions] = useState([]);
+  const [dataBaseOptions, setDataBaseOptions] = useState([]);
+  const [dataBaseError, setDataBaseError] = useState('');
 
   const fetchSqlType = useCallback(async () => {
     try {
@@ -27,19 +26,19 @@ export default function SqlTypeEdit() {
     }
   }, [id]);
 
-  const fetchDatabase = useCallback(async () => {
-    try {
-      const result = await getForCombobox('DataBase');
-      setDatabaseOptions(result);
-    } catch (error) {
-      console.error("Error fetching index types:", error);
-    }
-  }, []);
+  const fetchDataBase = useCallback(async () => {
+      try {
+        const result = await getForCombobox('DataBase');
+        setDataBaseOptions(result);
+      } catch (error) {
+        console.error("Error fetching index types:", error);
+      }
+    }, []);
 
   useEffect(() => {
     fetchSqlType();
-    fetchDatabase();
-  }, [fetchSqlType, fetchDatabase]);
+    fetchDataBase();
+  }, [fetchSqlType, fetchDataBase]);
 
   const handleNameChange = (e) => {
     const newName = e.target.value;
@@ -65,31 +64,30 @@ export default function SqlTypeEdit() {
     }));
   };
 
-  const handleDatabaseChange = (selectedOptions) => {
-    const newDatabases = databaseOptions.filter(e => selectedOptions.includes(e.id));
-    const validationError = validateEmpty(newDatabases.length !== 0, 'Databases');
-    setDatabasesError(validationError);
-    setSqlType((prev) => ({
-      ...prev,
-      dataBases: newDatabases,
-    }));
-  };
+  const handleDataBaseChange = (selectedOptions) => {
+      const validationError = validateEmpty(selectedOptions, 'DataBase');
+      setDataBaseError(validationError);
+      setSqlType((prev) => ({
+        ...prev,
+        dataBase: {id: selectedOptions},
+      }));
+    };
 
   const handleSave = async () => {
     try {
-      if (nameError || databasesError)
+      if (nameError)
         return;
 
       await update('SqlType', sqlType);
       navigate('/sqlTypes');
     } catch (error) {
-      console.error("Error updating property:", error);
+      console.error("Error updating sqlType:", error);
     }
   };
 
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
-      <h2 className="text-2xl font-semibold text-gray-700 mb-6">{id == 0 ? 'Add' : 'Edit'} Sql Type</h2>
+      <h2 className="text-2xl font-semibold text-gray-700 mb-6">{id != 0? 'Edit Sql Type' : 'Add Sql Type'}</h2>
       {loading ? (
         <Loader />
       ) : (
@@ -113,18 +111,18 @@ export default function SqlTypeEdit() {
             <label className="text-gray-600 font-medium mb-2">Has Params:</label>
             <ComboBox
               options={[{id: 2, name: 'Yes'}, {id: 1, name: 'No'}]}
-              selected={sqlType.hasParams ? 2 : 1 }
+              selected={sqlType.hasParams ? 2 : 1}
               onChange={handleHasParamsChange}
               placeholder="Select value"
             />
           </div>
           <div className="flex flex-col">
-            <label className="text-gray-600 font-medium mb-2">Databases:</label>
-            <MultiComboBox
-              options={databaseOptions}
-              selected={sqlType?.dataBases?.map(e => e.id)}
-              onChange={handleDatabaseChange}
-              error={databasesError}
+            <label className="text-gray-600 font-medium mb-2">DataBase:</label>
+            <ComboBox
+              options={dataBaseOptions}
+              selected={sqlType.dataBase?.id}
+              onChange={handleDataBaseChange}
+              error={dataBaseError}
             />
           </div>
           <div className="flex justify-end space-x-4 mt-6">

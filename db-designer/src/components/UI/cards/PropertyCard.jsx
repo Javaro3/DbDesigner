@@ -17,7 +17,7 @@ const PropertyCard = ({ model, properties, setPropertyError, onDelete, onPropert
     model.propertyId = propertyId;
     setIsSupportsParameter(propertyCombobox.find((t) => t.id === model.propertyId)?.hasParams);
     
-    await updateProperty(model, prevPropertyId);
+    await updateProperty(model);
     onPropertyChange(model);
   };
 
@@ -40,8 +40,9 @@ const PropertyCard = ({ model, properties, setPropertyError, onDelete, onPropert
         <Input
           disabled={!isSupportsParameter}
           size="small"
+          value={model.propertyParams}
           onChange={handlePropertyParamsChange}
-          onBlur={() => updateProperty(model, model.propertyId)}
+          onBlur={() => updateProperty(model)}
           placeholder="Enter parameter"
           className="w-full"/>
       </div>

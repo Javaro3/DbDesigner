@@ -1,0 +1,24 @@
+-- Project name: {{ project.name }}
+-- Project description: {{ project.name }}
+-- Database: {{ project.data_base.name }}
+{{ for table in project.tables }}
+TABLE
+(
+{{~ for column in table.columns ~}}
+    COLUMN
+{{~ end ~}}
+{{~ if project.data_base.id == 3 ~}}
+{{~ for relation in project.relations ~}}
+    RELATION
+{{~ end ~}}
+{{~ end ~}}
+);
+{{~ for index in table.indexes ~}}
+INDEX
+{{~ end ~}}
+{{ end }}
+{{ if project.data_base.id != 3 }}
+{{~ for relation in project.relations ~}}
+RELATION
+{{~ end ~}}
+{{ end }}

@@ -1,161 +1,118 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { AgGridReact } from 'ag-grid-react';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
-import TextFilter from '../../components/UI/gridFilters/TextFilter';
-import { API_BASE_URL, getForCombobox, getAll, deleteById } from '../../utils/apiHelper';
-import MultiSelectFilter from '../../components/UI/gridFilters/MultiboxFilter';
-import Button from '../../components/UI/buttons/Button';
+import { DataGrid, GridDeleteIcon, GridAddIcon } from '@mui/x-data-grid';
+import { API_BASE_URL, deleteById, getAll } from '../../utils/apiHelper';
 import { useNavigate } from 'react-router-dom';
+import { IconButton } from '@mui/material';
 
 export default function DataBaseList() {
   const navigate = useNavigate();
   const [rowData, setRowData] = useState([]);
   const [sortModel, setSortModel] = useState([]);
-  const [filterModel, setFilterModel] = useState({name: '', description: '', indexTypes: []});
-  const [indexTypesOptions, setIndexTypesOptions] = useState([]);
+  const [filterModel, setFilterModel] = useState({ name: '', description: '' });
   const [totalCount, setTotalCount] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [columnDefs, setColumnDefs] = useState([]);
+  const [pageSize, setPageSize] = useState(100);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
+    setLoading(true);
     const model = {
-      PageNumber: currentPage,
+      PageNumber: currentPage + 1,
       PageSize: pageSize,
-      SortField: sortModel,
+      ...(sortModel.length > 0 && {
+        SortField: {
+          Field: sortModel[0].field,
+          Direction: sortModel[0].sort,
+        },
+      }),
       Name: filterModel.name,
       Description: filterModel.description,
-      indexTypes: filterModel.indexTypes
     };
     const result = await getAll('DataBase', model);
     setRowData(result.data);
     setTotalCount(result.totalCount);
-  }, [pageSize, sortModel, filterModel]);
+    setLoading(false);
+  }, [currentPage, pageSize, sortModel, filterModel]);
 
-  const onDeleteHandle = useCallback(async (id) => {
-    const status = await deleteById('DataBase', id);
-    if (status == 200)
-      fetchData();
-  }, [fetchData]);
+  const onDeleteHandle = useCallback(
+    async (id) => {
+      const status = await deleteById('DataBase', id);
+      if (status === 200) fetchData();
+    }, [fetchData]
+  );
 
-  const fetchIndexTypesOptions = useCallback(async () => {
-    const options = await getForCombobox('IndexType');
-    setIndexTypesOptions(options);
-  }, []);
-
-  useEffect(() => {
-    setColumnDefs([
-    { 
+  const columns = [
+    {
       field: 'id',
-      cellRenderer: (params) => {
-        const id = params.value;
-        return (
-          <a href={`/editDatabase/${id}`} rel="noopener noreferrer">
-            {id}
-          </a>
-        );
-      },
-      filter: false,
-      flex: 1
-    },
-    { 
-      field: 'name', 
-      filter: TextFilter, 
-      flex: 2 
-    },
-    { 
-      field: 'description',
-      filter: TextFilter,
-      flex: 8 
+      headerName: 'ID',
+      flex: 2,
+      filterable: false,
+      renderCell: (params) => (
+        <a href={`/editDatabase/${params.value}`} rel="noopener noreferrer">
+          {params.value}
+        </a>
+      ),
     },
     {
-      field: 'indexTypes', 
-      filter: MultiSelectFilter,
-      filterParams: { options: indexTypesOptions },
-      sortable: false,
+      field: 'name',
+      headerName: 'Name',
       flex: 5,
-      valueFormatter: (params) => params.data.indexTypes.map(e => e.name).join(', ')
+    },
+    {
+      field: 'description',
+      headerName: 'Description',
+      flex: 15,
     },
     {
       field: 'image',
-      filter: false,
-      sortable: false,
-      flex: 2,
-      cellRenderer: (params) => {
-        const image = params.value;
-        return (
-          <img height={64} width={64} src={`${API_BASE_URL}/Image/${image}`} />
-        );
-      }
+      headerName: 'Image',
+      flex: 1,
+      renderCell: (params) => (
+        <img height={50} width={50} src={`${API_BASE_URL}/Image/${params.row.image}`} />
+      ),
     },
     {
-      headerName: "",
-      field: "",
-      sortable: false,
+      field: 'actions',
+      headerName: 'Actions',
       flex: 1,
-      cellRenderer: (params) => (
-        <Button size='small' className='w-full' onClick={() => onDeleteHandle(params.node.data.id)}>
-          <i className="fa-solid fa-trash"></i>
-        </Button>
-      )
-    }
-  ]);
-  }, [indexTypesOptions]);
-
-  const onSortChanged = useCallback((params) => {
-    const sortColumn = params.columns.filter(e => e.sort)[0];
-    if (sortColumn) {
-      setSortModel({ field: sortColumn.colId, direction: sortColumn.sort });
-    } else {
-      setSortModel([]);
-    }
-  }, []);
-
-  const onPaginationChanged = useCallback((params) => {
-    const newPage = params.api.paginationGetCurrentPage() + 1;
-    if (newPage !== currentPage) {
-      setCurrentPage(newPage);
-    }
-  }, [currentPage]);
-
-  const onFilterChanged = useCallback((params) => {
-    const filters = params.api.getFilterModel();
-    setFilterModel({ 
-      name: filters.name || '', 
-      description: filters.description || '', 
-      indexTypes: filters.indexTypes || [] 
-    });
-  }, []);
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <IconButton onClick={() => onDeleteHandle(params.row.id)}>
+          <GridDeleteIcon />
+        </IconButton>
+      ),
+    },
+  ];
 
   useEffect(() => {
-    fetchData(currentPage);
-  }, [fetchData, currentPage, sortModel]);
-
-  useEffect(() => {
-    fetchIndexTypesOptions();
-  }, [fetchIndexTypesOptions]);
-
-  const getRowHeight = useCallback(() => 70, []);
+    fetchData();
+  }, [fetchData, currentPage, pageSize, sortModel, filterModel]);
 
   return (
-    <div className="ag-theme-alpine" style={{ height: '90vh', width: '100%' }}>
-      <div className="flex justify-between items-center m-1">
-        <Button onClick={() => navigate('/editDatabase/0')} className="px-4 py-2 bg-blue-500 text-white rounded-md">
-          <i className="fa-solid fa-plus"></i>
-        </Button>
+    <div style={{ height: '92vh', width: '100%' }}>
+      <div className="flex justify-between items-center m-1">  
+          <GridAddIcon onClick={() => navigate('/editDatabase/0')}/>
       </div>
-      <AgGridReact
-        columnDefs={columnDefs}
-        rowData={rowData}
-        onSortChanged={onSortChanged}
-        onPaginationChanged={onPaginationChanged}
-        onFilterChanged={onFilterChanged}
-        pagination={true}
-        getRowHeight={getRowHeight}
-        paginationPageSize={pageSize}
-        paginationPageSizeSelector={[1, 5, 10, 20, 50, 100]}
-        onPaginationPageSizeChanged={(newPageSize) => setPageSize(newPageSize)}
+      <DataGrid
+        rows={rowData}
+        columns={columns}
+        loading={loading}
+        pageSize={pageSize}
+        rowCount={totalCount}
+        disableSelectionOnClick
+        pagination
+        pageSizeOptions={[5, 10, 20, 50, 100]}
+        paginationMode="server"
+        sortingMode="server"
+        filterMode="server"
+        onPaginationModelChange={(page) => {setPageSize(page.pageSize); setCurrentPage(page.page);}}
+        onSortModelChange={(newSortModel) => setSortModel(newSortModel)}
+        onFilterModelChange={(newFilterModel) => {
+          const name = newFilterModel.items.find((item) => item.field === 'name')?.value || '';
+          const description = newFilterModel.items.find((item) => item.field === 'description')?.value || '';
+          setFilterModel({ name, description });
+        }}
       />
     </div>
   );

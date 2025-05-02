@@ -59,7 +59,7 @@ export default function RelationActionEdit() {
 
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
-      <h2 className="text-2xl font-semibold text-gray-700 mb-6">Edit Relation Action</h2>
+      <h2 className="text-2xl font-semibold text-gray-700 mb-6">{id != 0? 'Edit Relation Action' : 'Add Relation Action'}</h2>
       {loading ? (
         <Loader />
       ) : (

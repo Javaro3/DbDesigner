@@ -7,6 +7,8 @@ export default function Header({ roles }) {
   const { logout } = useAuth();
 
   const adminLinks = [
+    { to: '/generationModels', label: 'Generation Models' },
+    { to: '/generationLanguages', label: 'Generation Languages' },
     { to: '/architectures', label: 'Architectures' },
     { to: '/databases', label: 'Databases' },
     { to: '/indexTypes', label: 'Index Types' },
@@ -17,7 +19,6 @@ export default function Header({ roles }) {
     { to: '/roles', label: 'Roles' },
     { to: '/users', label: 'Users' },
     { to: '/sqlTypes', label: 'Sql Types' },
-    { to: '/languageTypes', label: 'Language Types' }
   ];
   
   const userLinks = [
@@ -28,7 +29,7 @@ export default function Header({ roles }) {
   return (
     <header className="bg-blue-500 text-white flex justify-between items-center">
       <div className="text-lg font-bold pl-3">
-        <Link to="/home">DB DESINGER</Link>
+        <Link to="/">DB DESINGER</Link>
       </div>
 
       <nav className="flex gap-4">

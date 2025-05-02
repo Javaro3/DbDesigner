@@ -21,7 +21,7 @@ const Checkbox = ({
       />
       {label && (
         <label
-          className={`ml-2 text-sm ${
+          className={`ml-2 text-xl ${
             disabled ? 'text-gray-500' : 'text-gray-700'
           }`}
         >
