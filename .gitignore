@@ -170,7 +170,7 @@ projects/*
 /data_generator/__pycache__/
 /data_generator/*.py[cod]
 /data_generator/*$py.class
-/venv
+/data_generator/venv/
 /data_generator/.env/
 /data_generator/.venv/
 /data_generator/ENV/
