@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "QVHMyVA0Gwk1uO7Nc0NEbSQniyWMHr4os82PnY0jxNM=",
+  "Source": "DbDesigner.Web",
+  "BasePath": "_content/DbDesigner.Web",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
