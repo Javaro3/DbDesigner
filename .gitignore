@@ -1,6 +1,7 @@
 ### Global ###
 # IDE & Editor
 .vs/
+vs/
 .idea/
 .vscode/
 !.vscode/settings.json
