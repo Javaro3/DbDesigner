@@ -1,3 +1,4 @@
+# mounts
 /mounts/MsSql/**
 !/mounts/MsSql/.gitkeep
 /mounts/MySql/**
@@ -7,7 +8,12 @@
 /mounts/SqLite/**
 !/mounts/SqLite/.gitkeep
 
+# projects
 projects/*
+!/projects/.gitkeep
+
+
+
 db-designer/node_modules/
 
 .idea
