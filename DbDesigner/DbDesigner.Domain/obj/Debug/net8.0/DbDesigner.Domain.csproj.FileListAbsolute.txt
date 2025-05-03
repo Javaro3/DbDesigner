@@ -1,0 +1,13 @@
+/Users/korol/Documents/GSTU/diplom/DbDesigner/DbDesigner/DbDesigner.Domain/bin/Debug/net8.0/DbDesigner.Domain.deps.json
+/Users/korol/Documents/GSTU/diplom/DbDesigner/DbDesigner/DbDesigner.Domain/bin/Debug/net8.0/DbDesigner.Domain.dll
+/Users/korol/Documents/GSTU/diplom/DbDesigner/DbDesigner/DbDesigner.Domain/bin/Debug/net8.0/DbDesigner.Domain.pdb
+/Users/korol/Documents/GSTU/diplom/DbDesigner/DbDesigner/DbDesigner.Domain/obj/Debug/net8.0/DbDesigner.Domain.csproj.AssemblyReference.cache
+/Users/korol/Documents/GSTU/diplom/DbDesigner/DbDesigner/DbDesigner.Domain/obj/Debug/net8.0/DbDesigner.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/Users/korol/Documents/GSTU/diplom/DbDesigner/DbDesigner/DbDesigner.Domain/obj/Debug/net8.0/DbDesigner.Domain.AssemblyInfoInputs.cache
+/Users/korol/Documents/GSTU/diplom/DbDesigner/DbDesigner/DbDesigner.Domain/obj/Debug/net8.0/DbDesigner.Domain.AssemblyInfo.cs
+/Users/korol/Documents/GSTU/diplom/DbDesigner/DbDesigner/DbDesigner.Domain/obj/Debug/net8.0/DbDesigner.Domain.csproj.CoreCompileInputs.cache
+/Users/korol/Documents/GSTU/diplom/DbDesigner/DbDesigner/DbDesigner.Domain/obj/Debug/net8.0/DbDesigner.Domain.sourcelink.json
+/Users/korol/Documents/GSTU/diplom/DbDesigner/DbDesigner/DbDesigner.Domain/obj/Debug/net8.0/DbDesigner.Domain.dll
+/Users/korol/Documents/GSTU/diplom/DbDesigner/DbDesigner/DbDesigner.Domain/obj/Debug/net8.0/refint/DbDesigner.Domain.dll
+/Users/korol/Documents/GSTU/diplom/DbDesigner/DbDesigner/DbDesigner.Domain/obj/Debug/net8.0/DbDesigner.Domain.pdb
+/Users/korol/Documents/GSTU/diplom/DbDesigner/DbDesigner/DbDesigner.Domain/obj/Debug/net8.0/ref/DbDesigner.Domain.dll

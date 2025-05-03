@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "SPDaTddFE1o=",
+  "success": true,
+  "projectFilePath": "/Users/korol/Documents/GSTU/diplom/DbDesigner/DbDesigner/DbDesigner.Domain/DbDesigner.Domain.csproj",
+  "expectedPackageFiles": [
+    "/Users/korol/.nuget/packages/automapper/12.0.1/automapper.12.0.1.nupkg.sha512",
+    "/Users/korol/.nuget/packages/microsoft.csharp/4.7.0/microsoft.csharp.4.7.0.nupkg.sha512",
+    "/Users/korol/.nuget/packages/microsoft.netcore.app.ref/8.0.14/microsoft.netcore.app.ref.8.0.14.nupkg.sha512",
+    "/Users/korol/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.14/microsoft.aspnetcore.app.ref.8.0.14.nupkg.sha512"
+  ],
+  "logs": []
+}

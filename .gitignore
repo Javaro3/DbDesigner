@@ -3,7 +3,6 @@
 /mounts/PostgreSql/*
 /mounts/SqLite/*
 projects/*
-
 db-designer/node_modules/
 
 .idea
